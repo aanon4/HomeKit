@@ -5,20 +5,28 @@
  *      Author: tim
  */
 
-#include <stdint.h>
-#include <string.h>
-
-#include <app_error.h>
-#include <nrf_soc.h>
+#include <softdevice_handler.h>
 
 #include "random.h"
 
 
 void random_create(uint8_t* p_result, uint8_t length)
 {
-  while (length--)
+  uint32_t err_code;
+
+  while (length)
   {
-    *p_result++ = rand(); // Obviously not a good source of random numbers - FIXME
+    uint8_t available = 0;
+    err_code = sd_rand_application_bytes_available_get(&available);
+    APP_ERROR_CHECK(err_code);
+    if (available)
+    {
+      available = available < length ? available : length;
+      err_code = sd_rand_application_vector_get(p_result, available);
+      APP_ERROR_CHECK(err_code);
+      p_result += available;
+      length -= available;
+    }
   }
 }
 
