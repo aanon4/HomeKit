@@ -151,7 +151,7 @@ void service_ble_event(ble_evt_t* event)
           uint16_t blength = 0;
           if (session_writeData(service_state.buffer, service_state.length, service_state.buffer, &blength))
           {
-            service_state.current_characteristic->write(service_state.buffer, blength, service_state.current_characteristic->ctx);
+            service_state.current_characteristic->write(service_state.buffer, blength, service_state.current_characteristic);
           }
         }
         service_state.current_characteristic = NULL;
@@ -179,7 +179,7 @@ void service_ble_event(ble_evt_t* event)
           uint8_t* buffer = NULL;
           if (characteristic->read && (characteristic->plain || session_isEncrypted()))
           {
-            characteristic->read(&buffer, &length, characteristic->ctx);
+            characteristic->read(&buffer, &length, characteristic);
             if (buffer && length)
             {
               session_readData(buffer, length, service_state.buffer, &blength);
@@ -239,4 +239,14 @@ static const service_characteristic_t* service_findCharacteristicByHandle(uint16
     }
   }
   return NULL;
+}
+
+void service_notify(const service_characteristic_t* characteristic)
+{
+}
+
+void service_read_string(uint8_t** p_data, uint16_t* p_length, const service_characteristic_t* characteristic)
+{
+  *p_data = (uint8_t*)characteristic->ctx;
+  *p_length = strlen((char*)characteristic->ctx);
 }

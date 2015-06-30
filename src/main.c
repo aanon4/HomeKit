@@ -22,6 +22,7 @@
 #include "services/oneminutetimer.h"
 
 #include "homekit/homekit.h"
+#include "homekit/services/switch.h"
 
 
 
@@ -118,6 +119,7 @@ int main(void)
 	oneminutetimer_init();
 
 	homekit_init();
+	service_switch_init();
 
 	advertising_start();
 	while (1)

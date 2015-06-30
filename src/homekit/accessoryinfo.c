@@ -18,13 +18,7 @@
 #include "service.h"
 
 
-static void accessoryinfo_info(uint8_t** p_data, uint16_t* p_length, void* ctx)
-{
-  *p_data = (uint8_t*)ctx;
-  *p_length = strlen((char*)ctx);
-}
-
-static void accessoryinfo_identify(uint8_t* data, uint16_t length, void* ctx)
+static void accessoryinfo_identify(uint8_t* data, uint16_t length, const service_characteristic_t* characteristic)
 {
   HOMEKIT_CONFIG_IDENTIFY_FUNCTION(data, length, ctx);
 }
@@ -37,12 +31,12 @@ void accessoryinfo_init(void)
   };
   static const service_characteristic_t characteristics[] =
   {
-    { .name = "Service Instance ID", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SERVICE_ID }, .length = sizeof(HOMEKIT_CONFIG_SERVICE_ID) - 1, .ctx = HOMEKIT_CONFIG_SERVICE_ID, .read = accessoryinfo_info, .plain = 1 },
+    { .name = "Service Instance ID", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SERVICE_ID }, .length = sizeof(HOMEKIT_CONFIG_SERVICE_ID) - 1, .ctx = HOMEKIT_CONFIG_SERVICE_ID, .read = service_read_string, .plain = 1 },
     { .name = "Identify", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_IDENTITY }, .length = 1, .write = accessoryinfo_identify },
-    { .name = "Manufacturer Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_MANUFACTURER }, .length = sizeof(HOMEKIT_CONFIG_MANUFACTURER) - 1, .ctx = HOMEKIT_CONFIG_MANUFACTURER, .read = accessoryinfo_info },
-    { .name = "Model Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_MODEL }, .length = sizeof(HOMEKIT_CONFIG_MODEL) - 1, .ctx = HOMEKIT_CONFIG_MODEL, .read = accessoryinfo_info },
-    { .name = "Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_NAME }, .length = sizeof(HOMEKIT_CONFIG_NAME) - 1, .ctx = HOMEKIT_CONFIG_NAME, .read = accessoryinfo_info },
-    { .name = "Serial Number", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SERIAL_NR }, .length = sizeof(HOMEKIT_CONFIG_SERIAL_NR) - 1, .ctx = HOMEKIT_CONFIG_SERIAL_NR, .read = accessoryinfo_info },
+    { .name = "Manufacturer Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_MANUFACTURER }, .length = sizeof(HOMEKIT_CONFIG_MANUFACTURER) - 1, .ctx = HOMEKIT_CONFIG_MANUFACTURER, .read = service_read_string },
+    { .name = "Model Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_MODEL }, .length = sizeof(HOMEKIT_CONFIG_MODEL) - 1, .ctx = HOMEKIT_CONFIG_MODEL, .read = service_read_string },
+    { .name = "Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_NAME }, .length = sizeof(HOMEKIT_CONFIG_NAME) - 1, .ctx = HOMEKIT_CONFIG_NAME, .read = service_read_string },
+    { .name = "Serial Number", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SERIAL_NR }, .length = sizeof(HOMEKIT_CONFIG_SERIAL_NR) - 1, .ctx = HOMEKIT_CONFIG_SERIAL_NR, .read = service_read_string },
     {}
   };
   service_addService(&service, characteristics);
