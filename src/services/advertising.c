@@ -16,12 +16,8 @@
 
 #include "homekit/homekit-config.h"
 #include "homekit/uuids.h"
+#include "homekit/crypto/crypto.h"
 
-/**@brief Function for initializing the Advertising functionality.
- *
- * @details Encodes the required advertising data and passes it to the stack.
- *          Also builds a structure to be passed to the stack when starting advertising.
- */
 void advertising_init(void)
 {
     uint32_t      err_code;
@@ -31,12 +27,13 @@ void advertising_init(void)
     {
         { .type = BLE_UUID_TYPE_BLE, .uuid = HOMEKIT_SERVICE_UUID_PAIRING }
     };
-    static const uint8_t service_data_data[] =
+    const uint8_t service_data_data[] =
     {
         HOMEKIT_CONFIG_DEVICE_NAME_BYTES,
-        0x01, 0x00, 0x01
+        HOMEKIT_CONFIG_VERSION,
+        crypto_advertise()
     };
-    static const ble_advdata_service_data_t service_data =
+    const ble_advdata_service_data_t service_data =
     {
        .service_uuid = HOMEKIT_SERVICE_UUID_PAIRING,
        .data =
@@ -45,7 +42,7 @@ void advertising_init(void)
          .size = sizeof(service_data_data)
        }
     };
-    static const ble_advdata_t adv_data =
+    const ble_advdata_t adv_data =
     {
       .name_type = BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
       .flags =
@@ -69,6 +66,9 @@ void advertising_init(void)
 void advertising_start(void)
 {
     uint32_t err_code;
+
+    // Reinitialize
+    advertising_init();
 
     // Start advertising
     ble_gap_adv_params_t adv_params =

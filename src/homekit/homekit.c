@@ -25,3 +25,8 @@ void homekit_ble_event(ble_evt_t* p_ble_evt)
   pairing_ble_event(p_ble_evt);
   service_ble_event(p_ble_evt);
 }
+
+void homekit_execute(void)
+{
+  pairing_execute();
+}

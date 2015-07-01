@@ -16,6 +16,8 @@
 
 #include "crypto.h"
 
+#define CRYPTO_INSTANCE  2   // Change this to force key regeneration on next run
+
 crypto_keys_t crypto_keys;
 
 static const uint8_t zeros64[64];
@@ -27,6 +29,7 @@ static void crypto_pstorage_callback(pstorage_handle_t *p_handle, uint8_t op_cod
 typedef struct
 {
   uint8_t valid0;
+  uint8_t instance;
 
   // Local keys
   uint8_t srp_b[32];
@@ -42,7 +45,7 @@ typedef struct
   uint8_t ltpk[32];
 
   uint8_t valid1;
-  uint8_t __padding__[2];
+  uint8_t __padding__[1];
 } crypto_persistent_keys_t;
 
 void crypto_init(void)
@@ -86,7 +89,7 @@ static uint8_t crypto_loadKeys(void)
   err_code = pstorage_load((uint8_t*)&keys, &handle, sizeof(keys), 0);
   APP_ERROR_CHECK(err_code);
 
-  if (keys.valid0 == 0x55 && keys.valid1 == 0xAA)
+  if (keys.valid0 == 0x55 && keys.valid1 == 0xAA && keys.instance == CRYPTO_INSTANCE)
   {
     // Valid
     memcpy(srp.b, keys.srp_b, 32);
@@ -132,6 +135,7 @@ void crypto_storeKeys(void)
     memcpy(keys.clientname, crypto_keys.client.name, 36);
     memcpy(keys.ltpk, crypto_keys.client.ltpk, 32);
 
+    keys.instance = CRYPTO_INSTANCE;
     keys.valid0 = 0x55;
     keys.valid1 = 0xAA;
     err_code = pstorage_update(&handle, (uint8_t*)&keys, sizeof(keys), 0);
@@ -140,9 +144,9 @@ void crypto_storeKeys(void)
     // Pump events until the store is done
     while (crypto_storing)
     {
-      app_sched_execute();
       err_code = sd_app_evt_wait();
       APP_ERROR_CHECK(err_code);
+      app_sched_execute();
     }
   }
 }
@@ -157,6 +161,19 @@ static void crypto_pstorage_callback(pstorage_handle_t *p_handle, uint8_t op_cod
 
   default:
     break;
+  }
+}
+
+uint8_t crypto_advertise(void)
+{
+  // If we have a client name, we don't advertise, otherwise we do.
+  if (crypto_keys.client.name[0])
+  {
+    return 0;
+  }
+  else
+  {
+    return 1;
   }
 }
 

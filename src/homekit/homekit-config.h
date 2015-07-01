@@ -8,6 +8,8 @@
 #ifndef HOMEKIT_HOMEKIT_CONFIG_H_
 #define HOMEKIT_HOMEKIT_CONFIG_H_
 
+#define HOMEKIT_CONFIG_VERSION                          0x01, 0x00
+
 #define HOMEKIT_CONFIG_DEVICE_NAME_STRING               "41:42:43:44:45:46"
 #define HOMEKIT_CONFIG_DEVICE_NAME_BYTES                0x41, 0x42, 0x43, 0x44, 0x45, 0x46
 

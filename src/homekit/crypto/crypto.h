@@ -50,5 +50,6 @@ extern void crypto_sha512hmac(uint8_t* hash, uint8_t* salt, uint8_t salt_length,
 extern void crypto_hkdf(uint8_t* target, uint8_t* salt, uint8_t salt_length, uint8_t* info, uint8_t info_length, uint8_t* ikm, uint8_t ikm_length);
 extern void crypto_transportEncrypt(uint8_t* key, uint8_t* nonce, uint8_t* plaintext, uint16_t plength, uint8_t* ciphertext, uint16_t* clength);
 extern uint8_t crypto_transportDecrypt(uint8_t* key, uint8_t* nonce, uint8_t* ciphertext, uint16_t clength, uint8_t* plaintext, uint16_t* plength);
+extern uint8_t crypto_advertise(void);
 
 #endif /* HOMEKIT_CRYPTO_H_ */
