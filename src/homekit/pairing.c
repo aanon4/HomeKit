@@ -30,7 +30,7 @@ static Pairing_Event pairing_map_read_event(uint16_t hand);
 
 #define PAIRING_SETUP_MAX_SIZE  MAX(409 /* READ = 3 + (2 + 16) + (4 + 384) */, 457 /* WRITE = 3 + (4 + 384) + (2 + 64) */)
 #define PAIRING_VERIFY_MAX_SIZE 140
-#define PAIRING_PAIRS_MAX_SIZE  1
+#define PAIRING_PAIRS_MAX_SIZE  60
 #define PAIRING_BUFFER_SIZE     MAX(MAX(PAIRING_SETUP_MAX_SIZE, PAIRING_VERIFY_MAX_SIZE), PAIRING_PAIRS_MAX_SIZE)
 
 static const uint8_t pairing_device_name[17] = HOMEKIT_CONFIG_DEVICE_NAME_STRING;
@@ -409,6 +409,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
             {
               memcpy(crypto_keys.client.ltpk, ltpk, sizeof(crypto_keys.client.ltpk));
               memcpy(crypto_keys.client.name, client, 36);
+              crypto_scheduleStoreKeys();
             }
           }
         }
@@ -624,52 +625,63 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
 
   case PAIRING_EVENT_PAIRINGS_WRITE:
   {
-    uint8_t type;
-    uint16_t length;
-    uint8_t* value;
-    uint8_t op = 0;
-    uint8_t* clientname = NULL;
-    uint8_t* ltpk = NULL;
-    while (status == PAIRING_STATUS_OK && tlv_decode_next(&data, &olength, &type, &length, &value))
+    uint16_t blength = 0;
+    if (session_isEncrypted() && session_writeData(data, olength, data, &blength))
     {
-      switch (type)
+      uint8_t type;
+      uint16_t length;
+      uint8_t* value;
+      uint8_t op = 0;
+      uint8_t* clientname = NULL;
+
+      while (status == PAIRING_STATUS_OK && tlv_decode_next(&data, &blength, &type, &length, &value))
       {
-      case PAIRING_TAG_TYPE:
-        if (length == 1)
+        switch (type)
         {
-          op = value[0];
-        }
-        break;
+        case PAIRING_TAG_STATE:
+          pairing_state = length == 1 ? value[0] : 0;
+          break;
 
-      case PAIRING_TAG_CLIENTNAME:
-        if (length == 36)
+        case PAIRING_TAG_TYPE:
+          if (length == 1)
+          {
+            op = value[0];
+          }
+          break;
+
+        case PAIRING_TAG_CLIENTNAME:
+          if (length == 36)
+          {
+            clientname = value;
+          }
+          break;
+
+        default:
+          status = PAIRING_STATUS_ERROR;
+          break;
+        }
+      }
+      if (status == PAIRING_STATUS_OK && op && clientname)
+      {
+        switch (op)
         {
-          clientname = value;
-        }
-        break;
+        case 4: // Remove entry
+          if (memcmp(clientname, crypto_keys.client.name, sizeof(crypto_keys.client.name)) == 0)
+          {
+            memset(crypto_keys.client.name, 0, sizeof(crypto_keys.client.name));
+            memset(crypto_keys.client.ltpk, 0, sizeof(crypto_keys.client.ltpk));
+            crypto_scheduleStoreKeys();
+          }
+          break;
 
-      case PAIRING_TAG_PUBLICKEY:
-        if (length == 32)
-        {
-          ltpk = value;
+        default:
+          break;
         }
-        break;
-
-      default:
-        status = PAIRING_STATUS_ERROR;
-        break;
       }
     }
-    if (status == PAIRING_STATUS_OK && op && clientname)
+    else
     {
-      if (op == 3 && ltpk) // Add
-      {
-        pairing_state = 1;
-      }
-      else if (op == 4) // Remove
-      {
-        pairing_state = 1;
-      }
+      status = PAIRING_STATUS_ERROR;
     }
     break;
   }
@@ -680,8 +692,13 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
     {
     case 1:
       pairing_state = 2;
-
-      tlv_encode_next(&data, rlength, PAIRING_TAG_STATE, sizeof(pairing_state), &pairing_state);
+      if (session_isEncrypted())
+      {
+        static const uint8_t status[] = { PAIRING_TAG_STATE, 1, 2 };
+        uint16_t slength = 0;
+        session_readData((uint8_t*)status, sizeof(status), data, &slength);
+        rlength -= slength;
+      }
       break;
 
     default:
