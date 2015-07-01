@@ -42,6 +42,7 @@ extern crypto_keys_t crypto_keys;
 
 
 extern void crypto_init(void);
+extern void crypto_scheduleStoreKeys(void);
 extern void crypto_storeKeys(void);
 extern uint8_t crypto_verifyAndDecrypt(const uint8_t* key, uint8_t* nonce, uint8_t* encrypted, uint8_t length, uint8_t* output_buf, uint8_t* mac);
 extern void crypto_encryptAndSeal(const uint8_t* key, uint8_t* nonce, uint8_t* plain, uint16_t length, uint8_t* output_buf, uint8_t* output_mac);

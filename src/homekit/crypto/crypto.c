@@ -69,6 +69,7 @@ void crypto_init(void)
     crypto_keys.verify.secret[31] = (crypto_keys.verify.secret[31] & 127) | 64;
 
     // Store for reuse
+    crypto_scheduleStoreKeys();
     crypto_storeKeys();
   }
 }
@@ -105,36 +106,44 @@ static uint8_t crypto_loadKeys(void)
   }
 }
 
+void crypto_scheduleStoreKeys(void)
+{
+    crypto_storing = 1;
+}
+
 void crypto_storeKeys(void)
 {
   uint32_t err_code;
 
-  pstorage_handle_t handle;
-  err_code = pstorage_block_identifier_get(&crypto_store_handle, 0, &handle);
-  APP_ERROR_CHECK(err_code);
-
-  crypto_persistent_keys_t keys = {};
-  memcpy(keys.srp_b, srp.b, 32);
-  memcpy(keys.srp_salt, srp.salt, 16);
-  memcpy(keys.srp_v, srp.v, 384);
-  memcpy(keys.srp_B, srp.B, 384);
-  memcpy(keys.sign_secret, crypto_keys.sign.secret, 64);
-  memcpy(keys.verify_secret, crypto_keys.verify.secret, 32);
-  memcpy(keys.verify_public, crypto_keys.verify.public, 32);
-  memcpy(keys.clientname, crypto_keys.client.name, 36);
-  memcpy(keys.ltpk, crypto_keys.client.ltpk, 32);
-
-  keys.valid0 = 0x55;
-  keys.valid1 = 0xAA;
-  err_code = pstorage_update(&handle, (uint8_t*)&keys, sizeof(keys), 0);
-  APP_ERROR_CHECK(err_code);
-
-  // Pump events until the store is done
-  for (crypto_storing = 1; crypto_storing; )
+  if (crypto_storing)
   {
-    app_sched_execute();
-    err_code = sd_app_evt_wait();
+    pstorage_handle_t handle;
+    err_code = pstorage_block_identifier_get(&crypto_store_handle, 0, &handle);
     APP_ERROR_CHECK(err_code);
+
+    crypto_persistent_keys_t keys = {};
+    memcpy(keys.srp_b, srp.b, 32);
+    memcpy(keys.srp_salt, srp.salt, 16);
+    memcpy(keys.srp_v, srp.v, 384);
+    memcpy(keys.srp_B, srp.B, 384);
+    memcpy(keys.sign_secret, crypto_keys.sign.secret, 64);
+    memcpy(keys.verify_secret, crypto_keys.verify.secret, 32);
+    memcpy(keys.verify_public, crypto_keys.verify.public, 32);
+    memcpy(keys.clientname, crypto_keys.client.name, 36);
+    memcpy(keys.ltpk, crypto_keys.client.ltpk, 32);
+
+    keys.valid0 = 0x55;
+    keys.valid1 = 0xAA;
+    err_code = pstorage_update(&handle, (uint8_t*)&keys, sizeof(keys), 0);
+    APP_ERROR_CHECK(err_code);
+
+    // Pump events until the store is done
+    while (crypto_storing)
+    {
+      app_sched_execute();
+      err_code = sd_app_evt_wait();
+      APP_ERROR_CHECK(err_code);
+    }
   }
 }
 
