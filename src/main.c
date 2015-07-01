@@ -12,14 +12,12 @@
 #include <pstorage.h>
 
 #include "services/gpio.h"
-#include "services/i2c.h"
 #include "services/timer.h"
 #include "services/scheduler.h"
 #include "services/advertising.h"
 #include "services/gap.h"
 #include "services/devinfo.h"
 #include "services/connparams.h"
-#include "services/oneminutetimer.h"
 
 #include "homekit/homekit.h"
 #include "homekit/services/switch.h"
@@ -115,8 +113,6 @@ int main(void)
 	devinfo_init();
 	advertising_init();
 	conn_params_init();
-	i2c_init();
-	oneminutetimer_init();
 
 	homekit_init();
 	service_switch_init();

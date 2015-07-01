@@ -79,10 +79,5 @@
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/nrf51_sdk/components/softdevice/common/softdevice_handler/softdevice_handler.c</locationURI>
 		</link>
-		<link>
-			<name>src/nrf51_sdk/twi_sw_master.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/nrf51_sdk/components/drivers_nrf/twi_master/twi_sw_master.c</locationURI>
-		</link>
 	</linkedResources>
 </projectDescription>
