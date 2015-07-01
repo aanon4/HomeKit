@@ -52,5 +52,6 @@ typedef enum
 
 extern void pairing_init(void);
 extern void pairing_ble_event(ble_evt_t* event);
+extern void pairing_execute(void);
 
 #endif /* HOMEKIT_PAIRING_H_ */

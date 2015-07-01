@@ -52,7 +52,7 @@ static struct
 } pairing_handle;
 
 static uint8_t pairing_state;
-
+static uint8_t pairing_justdisconnected;
 
 
 void pairing_init(void)
@@ -149,8 +149,7 @@ void pairing_ble_event(ble_evt_t* event)
   case BLE_GAP_EVT_DISCONNECTED:
     pairing_handle.connection = BLE_CONN_HANDLE_INVALID;
     session_setEncryption(0);
-    crypto_storeKeys();
-    advertising_start();
+    pairing_justdisconnected = 1;
     break;
 
   case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
@@ -247,6 +246,16 @@ void pairing_ble_event(ble_evt_t* event)
 
   default:
     break;
+  }
+}
+
+void pairing_execute(void)
+{
+  if (pairing_justdisconnected)
+  {
+    pairing_justdisconnected = 0;
+    crypto_storeKeys();
+    advertising_start();
   }
 }
 
@@ -697,7 +706,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
         static const uint8_t status[] = { PAIRING_TAG_STATE, 1, 2 };
         uint16_t slength = 0;
         session_readData((uint8_t*)status, sizeof(status), data, &slength);
-        rlength -= slength;
+        *rlength -= slength;
       }
       break;
 

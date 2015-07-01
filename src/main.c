@@ -121,6 +121,7 @@ int main(void)
 	while (1)
 	{
 		app_sched_execute();
+		homekit_execute();
 		err_code = sd_app_evt_wait();
 		APP_ERROR_CHECK(err_code);
 	}
