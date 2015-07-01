@@ -77,7 +77,9 @@ void advertising_start(void)
       .fp          = BLE_GAP_ADV_FP_ANY,
       .interval    = MSEC_TO_UNITS(APP_ADV_INTERVAL, UNIT_0_625_MS),
       .timeout     = APP_ADV_TIMEOUT_IN_SECONDS,
+#if 0
       .channel_mask = { .ch_38_off = 1, .ch_39_off = 1 } // HELP DEBUGGING
+#endif
     };
 
     err_code = sd_ble_gap_adv_start(&adv_params);
