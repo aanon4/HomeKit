@@ -20,8 +20,9 @@
 static struct
 {
   const service_characteristic_t*   current_characteristic;
+  uint16_t                          connection_handle;
   uint16_t                          length;
-  uint8_t                           buffer[HOMEKIT_CONFIG_SERVICE_BUFFERSIZE];
+  uint8_t                           buffer[SESSION_CIPHER_BUFFERLEN(HOMEKIT_CONFIG_SERVICE_BUFFERSIZE)];
   struct
   {
     uint16_t                        handle;
@@ -66,8 +67,12 @@ void service_addService(const service_service_t* service, const service_characte
     };
     const ble_gatts_char_md_t character =
     {
-      .char_props.read = !!characteristics[i].read,
-      .char_props.write = !!characteristics[i].write,
+      .char_props =
+      {
+        .read = !!characteristics[i].read,
+        .write = !!characteristics[i].write,
+        .notify = characteristics[i].notify
+      },
       .p_char_user_desc = (uint8_t*)characteristics[i].name,
       .char_user_desc_max_size = strlen(characteristics[i].name),
       .char_user_desc_size = strlen(characteristics[i].name)
@@ -88,6 +93,14 @@ void service_ble_event(ble_evt_t* event)
 
   switch (event->header.evt_id)
   {
+  case BLE_GAP_EVT_CONNECTED:
+    service_state.connection_handle = event->evt.gap_evt.conn_handle;
+    break;
+
+  case BLE_GAP_EVT_DISCONNECTED:
+    service_state.connection_handle = BLE_CONN_HANDLE_INVALID;
+    break;
+
   case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
   {
     switch (event->evt.gatts_evt.params.authorize_request.type)
@@ -241,8 +254,32 @@ static const service_characteristic_t* service_findCharacteristicByHandle(uint16
   return NULL;
 }
 
+static uint16_t service_findHandleFromCharacteristic(const service_characteristic_t* characteristic)
+{
+  for (unsigned i = service_state.mapfree; i--; )
+  {
+    if (service_state.map[i].characteristic == characteristic)
+    {
+      return service_state.map[i].handle;
+    }
+  }
+  return BLE_CONN_HANDLE_INVALID;
+}
+
 void service_notify(const service_characteristic_t* characteristic)
 {
+  uint32_t err_code;
+
+  if (characteristic->notify)
+  {
+    const ble_gatts_hvx_params_t params =
+    {
+      .handle = service_findHandleFromCharacteristic(characteristic),
+      .type = BLE_GATT_HVX_NOTIFICATION,
+    };
+    err_code = sd_ble_gatts_hvx(service_state.connection_handle, &params);
+    APP_ERROR_CHECK(err_code);
+  }
 }
 
 void service_read_string(uint8_t** p_data, uint16_t* p_length, const service_characteristic_t* characteristic)
