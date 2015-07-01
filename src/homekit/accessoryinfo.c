@@ -31,12 +31,12 @@ void accessoryinfo_init(void)
   };
   static const service_characteristic_t characteristics[] =
   {
-    { .name = "Service Instance ID", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SERVICE_ID }, .length = sizeof(HOMEKIT_CONFIG_SERVICE_ID) - 1, .ctx = HOMEKIT_CONFIG_SERVICE_ID, .read = service_read_string, .plain = 1 },
+    { .name = "Service Instance ID", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SERVICE_ID }, SERVICE_STRING(HOMEKIT_CONFIG_SERVICE_ID), .plain = 1 },
     { .name = "Identify", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_IDENTITY }, .length = 1, .write = accessoryinfo_identify },
-    { .name = "Manufacturer Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_MANUFACTURER }, .length = sizeof(HOMEKIT_CONFIG_MANUFACTURER) - 1, .ctx = HOMEKIT_CONFIG_MANUFACTURER, .read = service_read_string },
-    { .name = "Model Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_MODEL }, .length = sizeof(HOMEKIT_CONFIG_MODEL) - 1, .ctx = HOMEKIT_CONFIG_MODEL, .read = service_read_string },
-    { .name = "Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_NAME }, .length = sizeof(HOMEKIT_CONFIG_NAME) - 1, .ctx = HOMEKIT_CONFIG_NAME, .read = service_read_string },
-    { .name = "Serial Number", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SERIAL_NR }, .length = sizeof(HOMEKIT_CONFIG_SERIAL_NR) - 1, .ctx = HOMEKIT_CONFIG_SERIAL_NR, .read = service_read_string },
+    { .name = "Manufacturer Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_MANUFACTURER }, SERVICE_STRING(HOMEKIT_CONFIG_MANUFACTURER) },
+    { .name = "Model Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_MODEL }, SERVICE_STRING(HOMEKIT_CONFIG_MODEL) },
+    { .name = "Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_NAME }, SERVICE_STRING(HOMEKIT_CONFIG_NAME) },
+    { .name = "Serial Number", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SERIAL_NR }, SERVICE_STRING(HOMEKIT_CONFIG_SERIAL_NR) },
     {}
   };
   service_addService(&service, characteristics);

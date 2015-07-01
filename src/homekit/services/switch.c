@@ -50,8 +50,8 @@ void service_switch_init(void)
   };
   static const service_characteristic_t characteristics[] =
   {
-    { .name = "Service Instance ID", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SERVICE_ID }, .length = sizeof(ID) - 1, .ctx = ID, .read = service_read_string, .plain = 1 },
-    { .name = "Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_NAME }, .length = sizeof(NAME) - 1, .ctx = NAME, .read = service_read_string },
+    { .name = "Service Instance ID", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SERVICE_ID }, SERVICE_STRING(ID), .plain = 1 },
+    { .name = "Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_NAME }, SERVICE_STRING(NAME) },
     { .name = "On", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SWITCH_ON }, .length = 1, .read = service_switch_state, .write = service_switch_onoff, .notify = 1 },
     {}
   };

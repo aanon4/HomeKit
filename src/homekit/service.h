@@ -41,4 +41,6 @@ extern void service_addService(const service_service_t* service, const service_c
 extern void service_notify(const service_characteristic_t* characteristic);
 extern void service_read_string(uint8_t** p_data, uint16_t* p_length, const service_characteristic_t* characteristic);
 
+#define SERVICE_STRING(STR)   .ctx = (STR), .length = sizeof(STR) - 1, .read = service_read_string
+
 #endif /* HOMEKIT_SERVICE_H_ */
