@@ -62,7 +62,7 @@ void pairing_init(void)
   crypto_init();
 
   static const uint8_t features = 0; // 1 == MFi
-  static const uint8_t id = 0;
+  static const uint8_t id[] = "8";
   static const struct
   {
     const uint16_t  id;
@@ -76,7 +76,7 @@ void pairing_init(void)
     uint16_t*       handle;
   } init[] =
   {
-    { HOMEKIT_SERVICE_ID,   "Service Instance ID",  (uint8_t*)&id, sizeof(id),                    .read = 1 },
+    { HOMEKIT_SERVICE_ID,   "Service Instance ID",  (uint8_t*)id, sizeof(id) - 1,                 .read = 1 },
     { HOMEKIT_PAIR_SETUP,   "Pair Setup",           pairing_data.buffer, PAIRING_SETUP_MAX_SIZE,  .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairsetup },
     { HOMEKIT_PAIR_VERIFY,  "Pair Verify",          pairing_data.buffer, PAIRING_VERIFY_MAX_SIZE, .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairverify },
     { HOMEKIT_PAIR_FEATURES,"Pairing Features",     (uint8_t*)&features, sizeof(features),        .read = 1 },

@@ -17,7 +17,7 @@
 #define HOMEKIT_CONFIG_MODEL                            "Demo model"
 #define HOMEKIT_CONFIG_NAME                             "Demo name"
 #define HOMEKIT_CONFIG_SERIAL_NR                        "0123"
-#define HOMEKIT_CONFIG_SERVICE_ID                       "4567"
+#define HOMEKIT_CONFIG_SERVICE_ID                       "1"
 
 #define HOMEKIT_CONFIG_SERVICE_BUFFERSIZE               256
 #define HOMEKIT_CONFIG_SERVICE_MAX_CHARACTERISTICS       16
