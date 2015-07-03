@@ -18,6 +18,7 @@
 
 typedef unsigned char u8;
 typedef unsigned short u16;
+typedef short i16;
 typedef unsigned long u32;
 typedef unsigned long long u64;
 typedef long i32;
@@ -228,19 +229,26 @@ static inline void set25519(gf r, const gf a)
   FOR(i,16) r[i]=a[i];
 }
 
-static unsigned car25519(gf o)
+//#define MUL38(V) ((v)*38)
+#define MUL38(V) ((((((V) << 3) + (V)) << 1) + (V)) << 1)
+
+static void car25519(gf o)
 {
-  int i;
-  i64 c;
-  FOR(i,15) {
-    c=o[i]+(1LL<<16);
-    o[i]=c&0xFFFF;
-    o[i+1]+=(c>>16)-1;
+  i64 c=0;
+  unsigned i;
+  FOR(i,16) {
+    i64 v=o[i]+c;
+    o[i]=v&0xFFFF;
+    c=v>>16;
   }
-  c=o[15]+(1LL<<16);
-  o[15]=c&0xFFFF;
-  o[0]+=38*((c>>16)-1);
-  return !!(o[0] >> 16);
+  while (c) {
+    c=MUL38(c);
+    for(i = 0; c && i < 16; i++) {
+      i64 v=o[i]+c;
+      o[i]=v&0xFFFF;
+      c=v>>16;
+    }
+  }
 }
 
 static inline void sel25519(gf p,gf q)
@@ -256,8 +264,6 @@ static void pack25519(u8 *o,const gf n)
   int i,j,b;
   gf m,t;
   FOR(i,16) t[i]=n[i];
-  car25519(t) &&
-  car25519(t) &&
   car25519(t);
   FOR(j,2) {
     m[0]=t[0]-0xffed;
@@ -310,66 +316,73 @@ static inline void Z(gf o,const gf a,const gf b)
   FOR(i,16) o[i]=a[i]-b[i];
 }
 
-static inline void C(const gf o)
+static inline void CS(u16 s[16], const gf o)
 {
-  i64 c=0,v;
+  i64 c=0;
   unsigned i;
-  FOR(i,15) {
-    v=o[i]+c;
-    if (c||((u64)v>0xFFFF)) {
-      *(i64*)&o[i]=v&0xFFFF;
+  FOR(i,16) {
+    i64 v=o[i]+c;
+    s[i]=(u16)v;
+    c=v>>16;
+  }
+  while (c) {
+    c=MUL38(c);
+    for(i = 0; c && i < 16; i++) {
+      i64 v=s[i]+c;
+      s[i]=(u16)v;
       c=v>>16;
     }
   }
-  if(c) *(i64*)&o[15]+=c;
 }
 
 static void M(gf o,const gf a,const gf b)
 {
   unsigned i,j;
-  C(a);
-  C(b);
+  u16 as[16];
+  u16 bs[16];
+
+  CS(as, a);
+  CS(bs, b);
+
   i64 t[31],v;
   FOR(i,31) t[i]=0;
-  FOR(i,15) {
-    u32 ai=(u32)a[i];
-    FOR(j,15) {
-      t[i+j]+=ai*(u32)b[j];
+  i64* pt = &t[15];
+  for (u16* asp = &as[15]; asp >= as; asp--, pt--) {
+    u32 asi = *asp;
+    i64* ppt = pt + 15;
+    for (u16* bsp = &bs[15]; bsp >= bs; bsp--, ppt--) {
+      v=*ppt;
+      v+=(i64)(asi * (u32)*bsp);
+      *ppt=v;
     }
   }
-  i64 b15=b[15];
-  FOR(i,15) {
-    t[i+15]+=(u32)a[i]*b15;
-  }
-  i64 a15=a[15];
-  FOR(j,15) {
-    t[15+j]+=a15*(u32)b[j];
-  }
-  t[15+15]+=a15*b15;
-  FOR(i,15) { v=t[i+16]; o[i]=t[i]+(v<<1)+(v<<2)+(v<<5); }
+  FOR(i,15) { v=t[i+16]; v=MUL38(v); o[i]=t[i]+v; }
   o[15]=t[15];
-  car25519(o) &&
+
   car25519(o);
 }
 
 static void S(gf o,const gf a)
 {
   unsigned i,j;
-  C(a);
+  u16 as[16];
+
+  CS(as, a);
+
   i64 t[31],v;
   FOR(i,31) t[i]=0;
-  FOR(i,15) {
-    u32 ai = (u32)a[i];
+  FOR(i,16) {
+    u32 ai = (u32)as[i];
     t[i<<1]+=(u32)(ai*ai);
-    for(j=i+1;j<15;j++) {
-      t[i+j]+=((i64)(ai*(u32)a[j]))<<1;
+    for(j=i+1;j<16;j++) {
+      v=t[i+j];
+      v+=((i64)(ai*(u32)as[j]))<<1;
+      t[i+j]=v;
     }
-    t[i+15]+=(ai*a[15])<<1;
   }
-  t[15<<1]+=a[15]*a[15];
-  FOR(i,15) { v=t[i+16]; o[i]=t[i]+(v<<1)+(v<<2)+(v<<5); }
+  FOR(i,15) { v=t[i+16]; v=MUL38(v); o[i]=t[i]+v; }
   o[15]=t[15];
-  car25519(o) &&
+
   car25519(o);
 }
 
