@@ -13,7 +13,6 @@ extern int crypto_hash_sha512(unsigned char *,const unsigned char *,unsigned lon
 extern int crypto_onetimeauth_poly1305(unsigned char *,const unsigned char *,unsigned long,const unsigned char *);
 extern int crypto_onetimeauth_poly1305_verify(const unsigned char *,const unsigned char *,unsigned long,const unsigned char *);
 extern int crypto_scalarmult_curve25519(unsigned char *,const unsigned char *,const unsigned char *);
-extern int crypto_scalarmult_curve25519_base(unsigned char *,const unsigned char *);
 extern int crypto_box_curve25519chacha20poly1305_keypair(unsigned char *,unsigned char *);
 extern int crypto_sign_ed25519(unsigned char *,unsigned long long *,const unsigned char *,unsigned long long,const unsigned char *);
 extern int crypto_sign_ed25519_open(unsigned char *,unsigned long long *,const unsigned char *,unsigned long long,const unsigned char *);

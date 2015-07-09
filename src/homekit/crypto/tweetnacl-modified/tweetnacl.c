@@ -358,8 +358,6 @@ static void M(gf o,const gf a,const gf b)
   }
   FOR(i,15) { v=t[i+16]; v=MUL38(v); o[i]=t[i]+v; }
   o[15]=t[15];
-
-  car25519(o);
 }
 
 static void S(gf o,const gf a)
@@ -382,8 +380,6 @@ static void S(gf o,const gf a)
   }
   FOR(i,15) { v=t[i+16]; v=MUL38(v); o[i]=t[i]+v; }
   o[15]=t[15];
-
-  car25519(o);
 }
 
 static void inv25519(gf o,const gf i)
@@ -442,20 +438,16 @@ int crypto_scalarmult_curve25519(u8 *q,const u8 *n,const u8 *p)
       sel25519(a,b);
       sel25519(c,d);
     }
-    FOR(j,16) {
-      e[j]=a[j]+c[j];
-      a[j]-=c[j];
-      c[j]=b[j]+d[j];
-      b[j]-=d[j];
-    }
+    A(e,a,c);
+    Z(a,a,c);
+    A(c,b,d);
+    Z(b,b,d);
     S(d,e);
     S(f,a);
     M(a,c,a);
     M(c,b,e);
-    FOR(j,16) {
-      e[j]=a[j]+c[j];
-      a[j]-=c[j];
-    }
+    A(e,a,c);
+    Z(a,a,c);
     S(b,a);
     Z(c,d,f);
     M(a,c,_121665);
@@ -481,7 +473,7 @@ int crypto_scalarmult_curve25519(u8 *q,const u8 *n,const u8 *p)
   return 0;
 }
 
-int inline crypto_scalarmult_curve25519_base(u8 *q,const u8 *n)
+static int inline crypto_scalarmult_curve25519_base(u8 *q,const u8 *n)
 {
   return crypto_scalarmult_curve25519(q,n,_9);
 }
@@ -617,12 +609,6 @@ static void add(gf p[4],gf q[4])
   M(p[3], e, h);
 }
 
-static void cswap(gf p[4],gf q[4],u8 b)
-{
-  int i;
-  if (b) FOR(i,4) sel25519(p[i],q[i]);
-}
-
 static void pack(u8 *r,gf p[4])
 {
   gf tx, ty, zi;
@@ -635,17 +621,21 @@ static void pack(u8 *r,gf p[4])
 
 static void scalarmult(gf p[4],gf q[4],const u8 *s)
 {
-  int i;
   set25519(p[0],gf0);
   set25519(p[1],gf1);
   set25519(p[2],gf1);
   set25519(p[3],gf0);
-  for (i = 255;i >= 0;--i) {
-    u8 b = (s[i/8]>>(i&7))&1;
-    cswap(p,q,b);
-    add(q,p);
-    add(p,p);
-    cswap(p,q,b);
+  for (const u8* sp = &s[31]; sp >= s; --sp) {
+    const u8 si = *sp;
+    for (u8 j = 0x80; j; j>>=1) {
+      if (si & j) {
+        add(p,q);
+        add(q,q);
+      } else {
+        add(q,p);
+        add(p,p);
+      }
+    }
   }
 }
 
