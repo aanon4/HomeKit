@@ -20,6 +20,7 @@
 #include "tlv.h"
 #include "session.h"
 #include "crypto/crypto.h"
+#include "statistics.h"
 
 
 static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16_t olength, uint16_t* rlength);
@@ -349,6 +350,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
 
       case PAIRING_TAG_STATE:
         pairing_state = length == 1 ? value[0] : 0;
+        STAT_TIMER_START(pairing_ms[pairing_state]);
         break;
 
       case PAIRING_TAG_SRP_A:
@@ -434,6 +436,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
         break;
       }
     }
+    STAT_TIMER_END(pairing_ms[pairing_state]);
     break;
   }
   case PAIRING_EVENT_SETUP_READ:
@@ -443,6 +446,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
     case 1:
     {
       pairing_state = 2;
+      STAT_TIMER_START(pairing_ms[pairing_state]);
 
       tlv_encode_next(&data, rlength, PAIRING_TAG_STATE, sizeof(pairing_state), &pairing_state);
       tlv_encode_next(&data, rlength, PAIRING_TAG_SALT, 16, srp_getSalt());
@@ -452,6 +456,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
     case 3:
     {
       pairing_state = 4;
+      STAT_TIMER_START(pairing_ms[pairing_state]);
 
       tlv_encode_next(&data, rlength, PAIRING_TAG_STATE, sizeof(pairing_state), &pairing_state);
       tlv_encode_next(&data, rlength, PAIRING_TAG_SRP_M2, 64, srp_getM2());
@@ -461,6 +466,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
     case 5:
     {
       pairing_state = 6;
+      STAT_TIMER_START(pairing_ms[pairing_state]);
 
       uint8_t smessage[64 + 32 + sizeof(pairing_device_name) + 32];
       crypto_hkdf(smessage + 64, "Pair-Setup-Accessory-Sign-Salt", 30, "Pair-Setup-Accessory-Sign-Info\001", 31, srp_getK(), 64);
@@ -488,6 +494,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
       status = PAIRING_STATUS_ERROR;
       break;
     }
+    STAT_TIMER_END(pairing_ms[pairing_state]);
     break;
   }
 
@@ -498,6 +505,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
     case 1:
     {
       pairing_state = 2;
+      STAT_TIMER_START(verify_ms[pairing_state]);
 
       uint8_t smessage[64 + sizeof(crypto_keys.verify.public) + sizeof(pairing_device_name) + sizeof(session_keys.client.public)];
       memcpy(smessage + 64, crypto_keys.verify.public, sizeof(crypto_keys.verify.public));
@@ -524,6 +532,8 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
     case 3:
     {
       pairing_state = 4;
+      STAT_TIMER_START(verify_ms[pairing_state]);
+
       tlv_encode_next(&data, rlength, PAIRING_TAG_STATE, sizeof(pairing_state), &pairing_state);
       break;
     }
@@ -532,6 +542,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
       status = PAIRING_STATUS_ERROR;
       break;
     }
+    STAT_TIMER_END(verify_ms[pairing_state]);
     break;
   }
 
@@ -546,6 +557,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
       {
       case PAIRING_TAG_STATE:
         pairing_state = length == 1 ? value[0] : 0;
+        STAT_TIMER_START(verify_ms[pairing_state]);
         break;
 
       case PAIRING_TAG_PUBLICKEY:
@@ -616,6 +628,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
               else
               {
                 session_setEncryption(1);
+                STAT_TIMER_END(verify_ms[pairing_state]);
                 pairing_state = 3;
               }
             }
@@ -629,6 +642,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
         break;
       }
     }
+    STAT_TIMER_END(verify_ms[pairing_state]);
     break;
   }
 
