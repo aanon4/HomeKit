@@ -30,6 +30,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>src/nrf52_sdk</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>src/nrf51_sdk/app_gpiote_fast_detect.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/nrf51_sdk/components/libraries/gpiote/app_gpiote_fast_detect.c</locationURI>
@@ -78,6 +83,61 @@
 			<name>src/nrf51_sdk/softdevice_handler.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/nrf51_sdk/components/softdevice/common/softdevice_handler/softdevice_handler.c</locationURI>
+		</link>
+		<link>
+			<name>src/nrf52_sdk/app_gpiote_fast_detect.c</name>
+			<type>1</type>
+			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf52_sdk/components/libraries/gpiote/app_gpiote_fast_detect.c</location>
+		</link>
+		<link>
+			<name>src/nrf52_sdk/app_scheduler.c</name>
+			<type>1</type>
+			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf52_sdk/components/libraries/scheduler/app_scheduler.c</location>
+		</link>
+		<link>
+			<name>src/nrf52_sdk/app_timer.c</name>
+			<type>1</type>
+			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf52_sdk/components/libraries/timer/app_timer.c</location>
+		</link>
+		<link>
+			<name>src/nrf52_sdk/app_util_platform.c</name>
+			<type>1</type>
+			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf52_sdk/components/libraries/util/app_util_platform.c</location>
+		</link>
+		<link>
+			<name>src/nrf52_sdk/ble_advdata.c</name>
+			<type>1</type>
+			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf52_sdk/components/ble/common/ble_advdata.c</location>
+		</link>
+		<link>
+			<name>src/nrf52_sdk/ble_conn_params.c</name>
+			<type>1</type>
+			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf52_sdk/components/ble/common/ble_conn_params.c</location>
+		</link>
+		<link>
+			<name>src/nrf52_sdk/ble_dis.c</name>
+			<type>1</type>
+			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf52_sdk/components/ble/ble_services/ble_dis/ble_dis.c</location>
+		</link>
+		<link>
+			<name>src/nrf52_sdk/pstorage.c</name>
+			<type>1</type>
+			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf52_sdk/components/drivers_nrf/pstorage/pstorage.c</location>
+		</link>
+		<link>
+			<name>src/nrf52_sdk/softdevice_handler.c</name>
+			<type>1</type>
+			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf52_sdk/components/softdevice/common/softdevice_handler/softdevice_handler.c</location>
+		</link>
+		<link>
+			<name>src/nrf52_sdk/softdevice_handler_appsh.c</name>
+			<type>1</type>
+			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf52_sdk/components/softdevice/common/softdevice_handler/softdevice_handler_appsh.c</location>
+		</link>
+		<link>
+			<name>src/nrf52_sdk/system_nrf52.c</name>
+			<type>1</type>
+			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf52_sdk/components/toolchain/system_nrf52.c</location>
 		</link>
 	</linkedResources>
 </projectDescription>

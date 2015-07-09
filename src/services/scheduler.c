@@ -7,6 +7,10 @@
 
 #include <softdevice_handler.h>
 #include <app_timer.h>
+#if defined(CONFIG_S132)
+#include <app_timer_appsh.h>
+#endif
+#include <app_scheduler.h>
 
 #include "scheduler.h"
 

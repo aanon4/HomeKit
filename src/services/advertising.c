@@ -45,11 +45,17 @@ void advertising_init(void)
     const ble_advdata_t adv_data =
     {
       .name_type = BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
+#if defined(CONFIG_S130)
       .flags =
       {
         .p_data = (uint8_t*)&flags,
         .size = sizeof(flags)
       },
+#elif defined(CONFIG_S132)
+      .flags = flags,
+#else
+#error "Unknown config"
+#endif
       .uuids_complete =
       {
         .uuid_cnt = sizeof(uuids) / sizeof(uuids[0]),
