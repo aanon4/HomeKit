@@ -412,7 +412,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
 
             uint8_t result[sizeof(message)];
             uint64_t rlen = 0;
-            if (crypto_sign_ed25519_open(result, &rlen, message, sizeof(message), ltpk) != 0)
+            if (crypto_sign_open(result, &rlen, message, sizeof(message), ltpk) != 0)
             {
               status = PAIRING_STATUS_ERROR;
             }
@@ -473,7 +473,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
       memcpy(smessage + 64 + 32, pairing_device_name, sizeof(pairing_device_name));
       memcpy(smessage + 64 + 32 + sizeof(pairing_device_name), crypto_keys.sign.public, sizeof(crypto_keys.sign.public));
       uint64_t slen = 0;
-      crypto_sign_ed25519(smessage, &slen, smessage + 64, sizeof(smessage) - 64, crypto_keys.sign.secret);
+      crypto_sign(smessage, &slen, smessage + 64, sizeof(smessage) - 64, crypto_keys.sign.secret);
 
       uint8_t buffer[2 + sizeof(pairing_device_name) + 2 + 32 + 2 + 64 + 16];
       uint8_t* pbuffer = buffer;
@@ -512,7 +512,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
       memcpy(smessage + 64 + sizeof(crypto_keys.verify.public), pairing_device_name, sizeof(pairing_device_name));
       memcpy(smessage + 64 + sizeof(crypto_keys.verify.public) + sizeof(pairing_device_name), session_keys.client.public, sizeof(session_keys.client.public));
       uint64_t slen = 0;
-      crypto_sign_ed25519(smessage, &slen, smessage + 64, sizeof(smessage) - 64, crypto_keys.sign.secret);
+      crypto_sign(smessage, &slen, smessage + 64, sizeof(smessage) - 64, crypto_keys.sign.secret);
 
       uint8_t buffer[2 + sizeof(pairing_device_name) + 2 + 64 + 16];
       uint8_t* pbuffer = buffer;
@@ -565,7 +565,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
         if (length == 32)
         {
           memcpy(session_keys.client.public, value, sizeof(session_keys.client.public));
-          crypto_scalarmult_curve25519(session_keys.shared, crypto_keys.verify.secret, session_keys.client.public);
+          crypto_scalarmult(session_keys.shared, crypto_keys.verify.secret, session_keys.client.public);
         }
         break;
       }
@@ -621,7 +621,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
 
               uint8_t result[sizeof(message)];
               uint64_t rlen = 0;
-              if (crypto_sign_ed25519_open(result, &rlen, message, sizeof(message), crypto_keys.client.ltpk) != 0)
+              if (crypto_sign_open(result, &rlen, message, sizeof(message), crypto_keys.client.ltpk) != 0)
               {
                 status = PAIRING_STATUS_ERROR;
               }

@@ -11,8 +11,9 @@
  */
 
 #include <string.h>
+#include <stdint.h>
 
-#include "tweetnacl.h"
+#include "../crypto.h"
 
 #define FOR(i,n) for (i = 0;i < n;++i)
 
@@ -417,6 +418,8 @@ static void pow2523(gf o,const gf i)
   FOR(a,16) o[a]=c[a];
 }
 
+#if defined(USE_TWEETNACL_SCALARMULT)
+
 int crypto_scalarmult_curve25519(u8 *q,const u8 *n,const u8 *p)
 {
   u8 z[32],r;
@@ -473,16 +476,12 @@ int crypto_scalarmult_curve25519(u8 *q,const u8 *n,const u8 *p)
   return 0;
 }
 
-static int inline crypto_scalarmult_curve25519_base(u8 *q,const u8 *n)
+int crypto_scalarmult_curve25519_base(u8 *q,const u8 *n)
 {
   return crypto_scalarmult_curve25519(q,n,_9);
 }
 
-int crypto_box_curve25519chacha20poly1305_keypair(u8 *y,u8 *x)
-{
-  randombytes(x,32);
-  return crypto_scalarmult_curve25519_base(y,x);
-}
+#endif
 
 static u64 R(u64 x,int c) { return (x >> c) | (x << (64 - c)); }
 static u64 Ch(u64 x,u64 y,u64 z) { return (x & y) ^ (~x & z); }

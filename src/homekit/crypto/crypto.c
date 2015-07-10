@@ -67,7 +67,8 @@ void crypto_init(void)
 
     crypto_sign_ed25519_keypair(crypto_keys.sign.public, crypto_keys.sign.secret);
 
-    crypto_box_curve25519chacha20poly1305_keypair(crypto_keys.verify.public, crypto_keys.verify.secret);
+    random_create(crypto_keys.verify.secret, sizeof(crypto_keys.verify.secret));
+    crypto_scalarmult_base(crypto_keys.verify.public, crypto_keys.verify.secret);
     crypto_keys.verify.secret[0] &= 248;
     crypto_keys.verify.secret[31] = (crypto_keys.verify.secret[31] & 127) | 64;
 

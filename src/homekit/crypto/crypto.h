@@ -8,8 +8,15 @@
 #ifndef HOMEKIT_CRYPTO_H_
 #define HOMEKIT_CRYPTO_H_
 
+#define USE_UNACL_SCALARMULT  1
+//#define USE_TWEETNACL_SCALARMULT  1
+
+#if defined(USE_UNACL_SCALARMULT)
+#include "uNaCl/api.h"
+#endif
 #include "tweetnacl-modified/tweetnacl.h"
 #include "srp/srp.h"
+#include "random.h"
 
 typedef struct
 {
