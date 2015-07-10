@@ -14,19 +14,21 @@ runs on the Nordic nRF51 PCA10028 development board.
 
 ## Timings
 
-Here are some perliminary timings. Note that all crypto code is in C and assembly level tweaking should improve things greatly. Also note that these times do not include the time to send and receive the payloads. But, anyway, numbers:
+Here are some perliminary timings. Note that most of the crypto code is in C but with some assembly used to speed the 256-bit integer multiplies. Also note that these timings do not include the time to send and receive payloads. But, anyway, numbers:
 
 ### Pairing
 
-Pairing is dominated by the SRP algorithm which is very slow and expensive. Fortunately this only happens once when the iOS device is being associated with the HomeKit device. 
+Pairing is dominated by the SRP algorithm which is very slow and expensive. Fortunately this only happens once when the iOS device is being associated with the HomeKit device:
 
-Time: 42 seconds
+Time: 40 seconds
 
 ### Verify
 
-Verify happens everytime an iOS device reconnected to the HomeKit device. Ideally this should be as fast as possible.
+Verify happens everytime an iOS device reconnected to the HomeKit device. Ideally this should be as fast as possible. I've included the C-only and assembly timings here - the difference is dramatic:
 
-Time: 4 seconds
+Time (C code): 4 seconds
+
+Time (with assembly multiply): 1.2 seconds
 
 # Thanks
 
@@ -38,6 +40,8 @@ were implemented over Bluetooth.
 2. http://tweetnacl.cr.yp.to - which provides the compact eliptical curve implementations, as well as the sha512 hash.
 
 3. https://tls.mbed.org - which provides the core multi-precission math routines used in the SRP implementation.
+
+4. http://munacl.cryptojedi.org/ - which provides the ARM Cortex-M0 optimized Curve25519 implementation and fast multiply routines.
 
 # Notes
 
