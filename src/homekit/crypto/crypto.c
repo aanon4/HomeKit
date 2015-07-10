@@ -65,7 +65,7 @@ void crypto_init(void)
   {
     srp_init();
 
-    crypto_sign_ed25519_keypair(crypto_keys.sign.public, crypto_keys.sign.secret);
+    crypto_sign_keypair(crypto_keys.sign.public, crypto_keys.sign.secret);
 
     random_create(crypto_keys.verify.secret, sizeof(crypto_keys.verify.secret));
     crypto_scalarmult_base(crypto_keys.verify.public, crypto_keys.verify.secret);

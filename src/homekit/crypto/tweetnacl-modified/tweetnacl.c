@@ -336,6 +336,41 @@ static inline void CS(u16 s[16], const gf o)
   }
 }
 
+#if defined(USE_UNACL_SCALARMULT)
+
+extern void fe25519_mul(u16 o[16], u16 x[16], u16 y[16]);
+extern void fe25519_square(u16 o[16], u16 x[16]);
+
+static void M(gf o, const gf a, const gf b)
+{
+  unsigned i;
+  u16 as[16];
+  u16 bs[16];
+  u16 os[16];
+
+  CS(as, a);
+  CS(bs, b);
+
+  fe25519_mul(os, as, bs);
+
+  FOR(i,16) o[i] = os[i];
+}
+
+static void S(gf o, const gf a)
+{
+  unsigned i;
+  u16 as[16];
+  u16 os[16];
+
+  CS(as, a);
+
+  fe25519_square(os, as);
+
+  FOR(i,16) o[i] = os[i];
+}
+
+#else
+
 static void M(gf o,const gf a,const gf b)
 {
   unsigned i,j;
@@ -382,6 +417,8 @@ static void S(gf o,const gf a)
   FOR(i,15) { v=t[i+16]; v=MUL38(v); o[i]=t[i]+v; }
   o[15]=t[15];
 }
+
+#endif
 
 static void inv25519(gf o,const gf i)
 {

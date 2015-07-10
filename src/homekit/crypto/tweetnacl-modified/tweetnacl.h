@@ -8,6 +8,7 @@
 #ifndef HOMEKIT_TWEETNACL_TWEETNACL_H_
 #define HOMEKIT_TWEETNACL_TWEETNACL_H_
 
+#define crypto_sign_keypair     crypto_sign_ed25519_keypair
 #define crypto_sign_open        crypto_sign_ed25519_open
 #define crypto_sign             crypto_sign_ed25519
 #define crypto_scalarmult_base  crypto_scalarmult_curve25519_base

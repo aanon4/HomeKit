@@ -230,7 +230,7 @@ fe25519_add(
     out->as_uint32[7] = (uint32)accu;
 }
 
-static void
+void
 fe25519_mul(
     fe25519*       result,
     const fe25519* in1,
@@ -243,7 +243,7 @@ fe25519_mul(
     fe25519_reduceTo256Bits_asm(result,&tmp);
 }
 
-static void
+void
 fe25519_square(
     fe25519*       result,
     const fe25519* in
