@@ -20,24 +20,28 @@
 
 #define ID    "1"
 #define NAME  "Demo Switch"
+#if defined(NRF52)
+#define LED   17 // P0.17
+#else
 #define LED   21 // P0.21
+#endif
+static uint8_t switch_state = 0;
 
 static void service_switch_state(uint8_t** p_data, uint16_t* p_length, const service_characteristic_t* characteristic)
 {
-  static uint8_t state;
-
-  state = !nrf_gpio_pin_read(LED);
-
-  *p_data = &state;
+  *p_data = &switch_state;
   *p_length = 1;
 }
 
 static void service_switch_onoff(uint8_t* data, uint16_t length, const service_characteristic_t* characteristic)
 {
-  if (length > 0 && data[0] != !nrf_gpio_pin_read(LED))
+  if (length > 0 && data[0] != switch_state)
   {
-    nrf_gpio_pin_write(LED, !data[0]);
+    switch_state = !!data[0];
+    nrf_gpio_pin_write(LED, !switch_state);
+#if !defined(NRF52)
     service_notify(characteristic);
+#endif
   }
 }
 
@@ -58,5 +62,5 @@ void service_switch_init(void)
   service_addService(&service, characteristics);
 
   nrf_gpio_cfg_output(LED);
-  nrf_gpio_pin_write(LED, 1);
+  nrf_gpio_pin_write(LED, !switch_state);
 }
