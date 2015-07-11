@@ -507,10 +507,10 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
       pairing_state = 2;
       STAT_TIMER_START(verify_ms[pairing_state]);
 
-      uint8_t smessage[64 + sizeof(crypto_keys.verify.public) + sizeof(pairing_device_name) + sizeof(session_keys.client.public)];
-      memcpy(smessage + 64, crypto_keys.verify.public, sizeof(crypto_keys.verify.public));
-      memcpy(smessage + 64 + sizeof(crypto_keys.verify.public), pairing_device_name, sizeof(pairing_device_name));
-      memcpy(smessage + 64 + sizeof(crypto_keys.verify.public) + sizeof(pairing_device_name), session_keys.client.public, sizeof(session_keys.client.public));
+      uint8_t smessage[64 + sizeof(session_keys.verify.public) + sizeof(pairing_device_name) + sizeof(session_keys.client.public)];
+      memcpy(smessage + 64, session_keys.verify.public, sizeof(session_keys.verify.public));
+      memcpy(smessage + 64 + sizeof(session_keys.verify.public), pairing_device_name, sizeof(pairing_device_name));
+      memcpy(smessage + 64 + sizeof(session_keys.verify.public) + sizeof(pairing_device_name), session_keys.client.public, sizeof(session_keys.client.public));
       uint64_t slen = 0;
       crypto_sign(smessage, &slen, smessage + 64, sizeof(smessage) - 64, crypto_keys.sign.secret);
 
@@ -525,7 +525,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
 
       tlv_encode_next(&data, rlength, PAIRING_TAG_STATE, sizeof(pairing_state), &pairing_state);
       tlv_encode_next(&data, rlength, PAIRING_TAG_MSG, sizeof(buffer), buffer);
-      tlv_encode_next(&data, rlength, PAIRING_TAG_PUBLICKEY, sizeof(crypto_keys.verify.public), crypto_keys.verify.public);
+      tlv_encode_next(&data, rlength, PAIRING_TAG_PUBLICKEY, sizeof(session_keys.verify.public), session_keys.verify.public);
       break;
     }
 
@@ -565,7 +565,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
         if (length == 32)
         {
           memcpy(session_keys.client.public, value, sizeof(session_keys.client.public));
-          crypto_scalarmult(session_keys.shared, crypto_keys.verify.secret, session_keys.client.public);
+          crypto_scalarmult(session_keys.shared, session_keys.verify.secret, session_keys.client.public);
         }
         break;
       }
@@ -609,12 +609,12 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
             }
             else
             {
-              uint8_t message[64 + sizeof(session_keys.client.public) + 36 + sizeof(crypto_keys.verify.public)];
+              uint8_t message[64 + sizeof(session_keys.client.public) + 36 + sizeof(session_keys.verify.public)];
 
               memcpy(message, signature, 64);
               memcpy(message + 64, session_keys.client.public, sizeof(session_keys.client.public));
               memcpy(message + 64 + sizeof(session_keys.client.public), client, 36);
-              memcpy(message + 64 + sizeof(session_keys.client.public) + 36, crypto_keys.verify.public, sizeof(crypto_keys.verify.public));
+              memcpy(message + 64 + sizeof(session_keys.client.public) + 36, session_keys.verify.public, sizeof(session_keys.verify.public));
 
               // Reply now to avoid timeout
               pairing_send_auth_write_reply();

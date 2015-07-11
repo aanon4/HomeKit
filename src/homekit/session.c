@@ -19,6 +19,14 @@ static struct
   uint8_t havekeys;
 } session_state;
 
+void session_init(void)
+{
+  random_create(session_keys.verify.secret, sizeof(session_keys.verify.secret));
+  crypto_scalarmult_base(session_keys.verify.public, session_keys.verify.secret);
+  session_keys.verify.secret[0] &= 248;
+  session_keys.verify.secret[31] = (session_keys.verify.secret[31] & 127) | 64;
+}
+
 void session_setEncryption(uint8_t enable)
 {
   if (session_state.encrypting != enable)

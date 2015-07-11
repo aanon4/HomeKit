@@ -33,11 +33,8 @@ typedef struct
       };
     };
   } sign;
-  struct
-  {
-    uint8_t secret[32];
-    uint8_t public[32];
-  } verify;
+
+  // Client we are paied with
   struct
   {
     uint8_t name[36];

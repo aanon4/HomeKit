@@ -37,8 +37,6 @@ typedef struct
   uint8_t srp_v[384];
   uint8_t srp_B[384];
   uint8_t sign_secret[64];
-  uint8_t verify_secret[32];
-  uint8_t verify_public[32];
 
   // Client keys
   uint8_t clientname[36];
@@ -67,11 +65,6 @@ void crypto_init(void)
 
     crypto_sign_keypair(crypto_keys.sign.public, crypto_keys.sign.secret);
 
-    random_create(crypto_keys.verify.secret, sizeof(crypto_keys.verify.secret));
-    crypto_scalarmult_base(crypto_keys.verify.public, crypto_keys.verify.secret);
-    crypto_keys.verify.secret[0] &= 248;
-    crypto_keys.verify.secret[31] = (crypto_keys.verify.secret[31] & 127) | 64;
-
     // Store for reuse
     crypto_scheduleStoreKeys();
     crypto_storeKeys();
@@ -98,8 +91,6 @@ static uint8_t crypto_loadKeys(void)
     memcpy(srp.v, keys.srp_v, 384);
     memcpy(srp.B, keys.srp_B, 384);
     memcpy(crypto_keys.sign.secret, keys.sign_secret, 64);
-    memcpy(crypto_keys.verify.secret, keys.verify_secret, 32);
-    memcpy(crypto_keys.verify.public, keys.verify_public, 32);
     memcpy(crypto_keys.client.name, keys.clientname, 36);
     memcpy(crypto_keys.client.ltpk, keys.ltpk, 32);
     return 1;
@@ -131,8 +122,6 @@ void crypto_storeKeys(void)
     memcpy(keys.srp_v, srp.v, 384);
     memcpy(keys.srp_B, srp.B, 384);
     memcpy(keys.sign_secret, crypto_keys.sign.secret, 64);
-    memcpy(keys.verify_secret, crypto_keys.verify.secret, 32);
-    memcpy(keys.verify_public, crypto_keys.verify.public, 32);
     memcpy(keys.clientname, crypto_keys.client.name, 36);
     memcpy(keys.ltpk, crypto_keys.client.ltpk, 32);
 
