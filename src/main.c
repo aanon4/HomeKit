@@ -87,7 +87,7 @@ int main(void)
 
 	gpio_init();
 	scheduler_init();
-	// NB: If I put this init macro in it's one function in it's own service file, things stop working. No idea why :-(
+	// NB: If I put this init macro in its one function in its own service file, things stop working. No idea why :-(
   APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, false);
 
 	// Initialize the SoftDevice handler module.
@@ -100,7 +100,11 @@ int main(void)
 	// Enable BLE stack
 	ble_enable_params_t ble_enable_params =
 	{
-		.gatts_enable_params.service_changed = 1
+		.gatts_enable_params =
+		 {
+       .service_changed = 1,
+       .attr_tab_size   = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT
+		 }
 	};
 	err_code = sd_ble_enable(&ble_enable_params);
 	APP_ERROR_CHECK(err_code);
