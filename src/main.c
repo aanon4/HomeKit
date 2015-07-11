@@ -98,7 +98,7 @@ int main(void)
 #endif
 
 	// Enable BLE stack
-	ble_enable_params_t ble_enable_params =
+	static const ble_enable_params_t ble_enable_params =
 	{
 		.gatts_enable_params =
 		 {
@@ -106,7 +106,7 @@ int main(void)
        .attr_tab_size   = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT
 		 }
 	};
-	err_code = sd_ble_enable(&ble_enable_params);
+	err_code = sd_ble_enable((ble_enable_params_t*)&ble_enable_params);
 	APP_ERROR_CHECK(err_code);
 
 	// Register with the SoftDevice handler module for BLE events.
