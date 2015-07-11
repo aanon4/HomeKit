@@ -85,13 +85,6 @@ int main(void)
 {
 	uint32_t err_code;
 
-#if defined(NRF52)
-	// Force the FPU on otherwise the softdevice will crash when initialized
-  SCB->CPACR |= (3UL << 20) | (3UL << 22);
-  __DSB();
-  __ISB();
-#endif
-
 	gpio_init();
 	scheduler_init();
 	// NB: If I put this init macro in its one function in its own service file, things stop working. No idea why :-(
