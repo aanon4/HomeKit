@@ -16,19 +16,33 @@ runs on the Nordic nRF51 PCA10028 development board.
 
 Here are some perliminary timings. Note that most of the crypto code is in C but with some assembly used to speed the 256-bit integer multiplies. Also note that these timings do not include the time to send and receive payloads. But, anyway, numbers:
 
-### Pairing
+### nRF51
+
+#### Pairing
 
 Pairing is dominated by the SRP algorithm which is very slow and expensive. Fortunately this only happens once when the iOS device is being associated with the HomeKit device:
 
 Time: 40 seconds
 
-### Verify
+#### Verify
 
 Verify happens everytime an iOS device reconnected to the HomeKit device. Ideally this should be as fast as possible. I've included the C-only and assembly timings here - the difference is dramatic:
 
 Time (C code): 4 seconds
 
 Time (with assembly multiply): 1.2 seconds
+
+### nRF52
+
+Recently Nordic released their next generation BLE platform. I though it might be interesting to see how well it performs Pairing and Verify. As you can see, this chip is much, much faster:
+
+#### Pairing
+
+Time: 3.7 seconds
+
+#### Verify
+
+Time (with assembly multiply): 0.26 seconds
 
 # Thanks
 

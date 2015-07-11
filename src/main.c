@@ -85,6 +85,13 @@ int main(void)
 {
 	uint32_t err_code;
 
+#if defined(NRF52)
+	// Force the FPU on otherwise the softdevice will crash when initialized
+  SCB->CPACR |= (3UL << 20) | (3UL << 22);
+  __DSB();
+  __ISB();
+#endif
+
 	gpio_init();
 	scheduler_init();
 	// NB: If I put this init macro in its one function in its own service file, things stop working. No idea why :-(
@@ -98,7 +105,7 @@ int main(void)
 #endif
 
 	// Enable BLE stack
-	static const ble_enable_params_t ble_enable_params =
+	ble_enable_params_t ble_enable_params =
 	{
 		.gatts_enable_params =
 		 {
@@ -106,7 +113,7 @@ int main(void)
        .attr_tab_size   = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT
 		 }
 	};
-	err_code = sd_ble_enable((ble_enable_params_t*)&ble_enable_params);
+	err_code = sd_ble_enable(&ble_enable_params);
 	APP_ERROR_CHECK(err_code);
 
 	// Register with the SoftDevice handler module for BLE events.
