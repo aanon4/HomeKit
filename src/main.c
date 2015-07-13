@@ -9,9 +9,7 @@
  */
 
 #include <softdevice_handler.h>
-#if defined(CONFIG_S132)
 #include <softdevice_handler_appsh.h>
-#endif
 #include <app_scheduler.h>
 #include <pstorage.h>
 
@@ -91,11 +89,7 @@ int main(void)
   APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, false);
 
 	// Initialize the SoftDevice handler module.
-#if defined(SOFTDEVICE_HANDLER_APPSH_INIT)
 	SOFTDEVICE_HANDLER_APPSH_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, true);
-#else
-  SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, true);
-#endif
 
 	// Enable BLE stack
 	ble_enable_params_t ble_enable_params =

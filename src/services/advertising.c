@@ -22,7 +22,6 @@ void advertising_init(void)
 {
     uint32_t      err_code;
 
-    static const uint8_t flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
     static const ble_uuid_t uuids[] =
     {
         { .type = BLE_UUID_TYPE_BLE, .uuid = HOMEKIT_SERVICE_UUID_PAIRING }
@@ -45,17 +44,7 @@ void advertising_init(void)
     const ble_advdata_t adv_data =
     {
       .name_type = BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
-#if defined(CONFIG_S130)
-      .flags =
-      {
-        .p_data = (uint8_t*)&flags,
-        .size = sizeof(flags)
-      },
-#elif defined(CONFIG_S132)
-      .flags = flags,
-#else
-#error "Unknown config"
-#endif
+      .flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE,
       .uuids_complete =
       {
         .uuid_cnt = sizeof(uuids) / sizeof(uuids[0]),
