@@ -57,8 +57,8 @@ void pairing_init(void)
 
   crypto_init();
 
-  static const uint8_t features = 0; // 1 == MFi
-  static const uint8_t id[] = "8";
+  static const uint8_t features = HOMEKIT_CONFIG_MFI_CERTIFIED;
+  static const uint8_t id[] = HOMEKIT_CONFIG_PAIRING_ID;
   static const struct
   {
     const uint16_t  id;
@@ -72,7 +72,7 @@ void pairing_init(void)
     uint16_t*       handle;
   } init[] =
   {
-    { HOMEKIT_SERVICE_ID,   "Service Instance ID",  (uint8_t*)id, sizeof(id) - 1,            .read = 1 },
+    { HOMEKIT_SERVICE_ID,   "Service Instance ID",  (uint8_t*)id, sizeof(id) - 1,           .read = 1 },
     { HOMEKIT_PAIR_SETUP,   "Pair Setup",           buffer_buffer, PAIRING_SETUP_MAX_SIZE,  .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairsetup },
     { HOMEKIT_PAIR_VERIFY,  "Pair Verify",          buffer_buffer, PAIRING_VERIFY_MAX_SIZE, .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairverify },
     { HOMEKIT_PAIR_FEATURES,"Pairing Features",     (uint8_t*)&features, sizeof(features),  .read = 1 },
@@ -455,6 +455,11 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
 
       tlv_encode_next(&data, rlength, PAIRING_TAG_STATE, sizeof(pairing_state), &pairing_state);
       tlv_encode_next(&data, rlength, PAIRING_TAG_SRP_M2, 64, srp_getM2());
+
+      // MFi
+      // Guessing that a MFi certified device returns something extra here since this is the last transaction
+      // iOS will read before terminating the pairing process if you enable MFi compatibility.
+
       break;
     }
 
