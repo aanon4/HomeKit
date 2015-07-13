@@ -16,13 +16,13 @@
 #include "homekit-config.h"
 #include "session.h"
 #include "service.h"
+#include "buffer.h"
 
 static struct
 {
   const service_characteristic_t*   current_characteristic;
   uint16_t                          connection_handle;
   uint16_t                          length;
-  uint8_t                           buffer[SESSION_CIPHER_BUFFERLEN(HOMEKIT_CONFIG_SERVICE_BUFFERSIZE)];
   struct
   {
     uint16_t                        handle;
@@ -63,7 +63,7 @@ void service_addService(const service_service_t* service, const service_characte
       .p_uuid = (ble_uuid_t*)&characteristics[i].uuid,
       .p_attr_md = &metadata,
       .max_len = SESSION_CIPHER_BUFFERLEN(characteristics[i].max_length ? characteristics[i].max_length : characteristics[i].length),
-      .p_value = service_state.buffer
+      .p_value = buffer_buffer
     };
     const ble_gatts_char_md_t character =
     {
@@ -116,9 +116,9 @@ void service_ble_event(ble_evt_t* event)
           if (characteristic->write && (characteristic->plain || session_isEncrypted()))
           {
             uint16_t blength = 0;
-            if (SESSION_PLAIN_BUFFERLEN(event->evt.gatts_evt.params.authorize_request.request.write.len) <= sizeof(service_state.buffer) && session_writeData(event->evt.gatts_evt.params.authorize_request.request.write.data, event->evt.gatts_evt.params.authorize_request.request.write.len, service_state.buffer, &blength))
+            if (SESSION_PLAIN_BUFFERLEN(event->evt.gatts_evt.params.authorize_request.request.write.len) <= sizeof(buffer_buffer) && session_writeData(event->evt.gatts_evt.params.authorize_request.request.write.data, event->evt.gatts_evt.params.authorize_request.request.write.len, buffer_buffer, &blength))
             {
-              characteristic->write(service_state.buffer, blength, characteristic->ctx);
+              characteristic->write(buffer_buffer, blength, characteristic->ctx);
             }
           }
           service_state.current_characteristic = NULL;
@@ -132,9 +132,9 @@ void service_ble_event(ble_evt_t* event)
           }
           if (service_state.current_characteristic == characteristic)
           {
-            if (event->evt.gatts_evt.params.authorize_request.request.write.offset + event->evt.gatts_evt.params.authorize_request.request.write.len <= sizeof(service_state.buffer))
+            if (event->evt.gatts_evt.params.authorize_request.request.write.offset + event->evt.gatts_evt.params.authorize_request.request.write.len <= sizeof(buffer_buffer))
             {
-              memcpy(service_state.buffer + service_state.length, event->evt.gatts_evt.params.authorize_request.request.write.data, event->evt.gatts_evt.params.authorize_request.request.write.len);
+              memcpy(buffer_buffer + service_state.length, event->evt.gatts_evt.params.authorize_request.request.write.data, event->evt.gatts_evt.params.authorize_request.request.write.len);
               service_state.length = service_state.length + event->evt.gatts_evt.params.authorize_request.request.write.len;
             }
           }
@@ -162,9 +162,9 @@ void service_ble_event(ble_evt_t* event)
         if (service_state.current_characteristic->write && (service_state.current_characteristic->plain || session_isEncrypted()))
         {
           uint16_t blength = 0;
-          if (session_writeData(service_state.buffer, service_state.length, service_state.buffer, &blength))
+          if (session_writeData(buffer_buffer, service_state.length, buffer_buffer, &blength))
           {
-            service_state.current_characteristic->write(service_state.buffer, blength, service_state.current_characteristic);
+            service_state.current_characteristic->write(buffer_buffer, blength, service_state.current_characteristic);
           }
         }
         service_state.current_characteristic = NULL;
@@ -195,7 +195,7 @@ void service_ble_event(ble_evt_t* event)
             characteristic->read(&buffer, &length, characteristic);
             if (buffer && length)
             {
-              session_readData(buffer, length, service_state.buffer, &blength);
+              session_readData(buffer, length, buffer_buffer, &blength);
             }
           }
           ble_gatts_rw_authorize_reply_params_t reply =
@@ -207,7 +207,7 @@ void service_ble_event(ble_evt_t* event)
               .update = 1,
               .offset = 0,
               .len = blength,
-              .p_data = service_state.buffer
+              .p_data = buffer_buffer
             }
           };
           err_code = sd_ble_gatts_rw_authorize_reply(event->evt.gatts_evt.conn_handle, &reply);

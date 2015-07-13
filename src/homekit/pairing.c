@@ -19,6 +19,7 @@
 #include "pairing.h"
 #include "tlv.h"
 #include "session.h"
+#include "buffer.h"
 #include "crypto/crypto.h"
 #include "statistics.h"
 
@@ -29,18 +30,12 @@ static void pairing_error(void);
 static Pairing_Event pairing_map_write_event(uint16_t hand);
 static Pairing_Event pairing_map_read_event(uint16_t hand);
 
-#define PAIRING_SETUP_MAX_SIZE  MAX(409 /* READ = 3 + (2 + 16) + (4 + 384) */, 457 /* WRITE = 3 + (4 + 384) + (2 + 64) */)
-#define PAIRING_VERIFY_MAX_SIZE 140
-#define PAIRING_PAIRS_MAX_SIZE  60
-#define PAIRING_BUFFER_SIZE     MAX(MAX(PAIRING_SETUP_MAX_SIZE, PAIRING_VERIFY_MAX_SIZE), PAIRING_PAIRS_MAX_SIZE)
-
 static const uint8_t pairing_device_name[17] = HOMEKIT_CONFIG_DEVICE_NAME_STRING;
 
 static struct
 {
   Pairing_Event pending_event;
   uint8_t sent_reply;
-  uint8_t buffer[PAIRING_BUFFER_SIZE];
   uint16_t length;
 } pairing_data;
 
@@ -77,11 +72,11 @@ void pairing_init(void)
     uint16_t*       handle;
   } init[] =
   {
-    { HOMEKIT_SERVICE_ID,   "Service Instance ID",  (uint8_t*)id, sizeof(id) - 1,                 .read = 1 },
-    { HOMEKIT_PAIR_SETUP,   "Pair Setup",           pairing_data.buffer, PAIRING_SETUP_MAX_SIZE,  .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairsetup },
-    { HOMEKIT_PAIR_VERIFY,  "Pair Verify",          pairing_data.buffer, PAIRING_VERIFY_MAX_SIZE, .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairverify },
-    { HOMEKIT_PAIR_FEATURES,"Pairing Features",     (uint8_t*)&features, sizeof(features),        .read = 1 },
-    { HOMEKIT_PAIRINGS,     "Pairings",             pairing_data.buffer, PAIRING_PAIRS_MAX_SIZE,  .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairings },
+    { HOMEKIT_SERVICE_ID,   "Service Instance ID",  (uint8_t*)id, sizeof(id) - 1,            .read = 1 },
+    { HOMEKIT_PAIR_SETUP,   "Pair Setup",           buffer_buffer, PAIRING_SETUP_MAX_SIZE,  .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairsetup },
+    { HOMEKIT_PAIR_VERIFY,  "Pair Verify",          buffer_buffer, PAIRING_VERIFY_MAX_SIZE, .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairverify },
+    { HOMEKIT_PAIR_FEATURES,"Pairing Features",     (uint8_t*)&features, sizeof(features),  .read = 1 },
+    { HOMEKIT_PAIRINGS,     "Pairings",             buffer_buffer, PAIRING_PAIRS_MAX_SIZE,  .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairings },
     {}
   };
 
@@ -176,9 +171,9 @@ void pairing_ble_event(ble_evt_t* event)
             break;
 
           case BLE_GATTS_OP_PREP_WRITE_REQ:
-            if (event->evt.gatts_evt.params.authorize_request.request.write.offset + event->evt.gatts_evt.params.authorize_request.request.write.len <= sizeof(pairing_data.buffer))
+            if (event->evt.gatts_evt.params.authorize_request.request.write.offset + event->evt.gatts_evt.params.authorize_request.request.write.len <= sizeof(buffer_buffer))
             {
-              memcpy(pairing_data.buffer + event->evt.gatts_evt.params.authorize_request.request.write.offset, event->evt.gatts_evt.params.authorize_request.request.write.data, event->evt.gatts_evt.params.authorize_request.request.write.len);
+              memcpy(buffer_buffer + event->evt.gatts_evt.params.authorize_request.request.write.offset, event->evt.gatts_evt.params.authorize_request.request.write.data, event->evt.gatts_evt.params.authorize_request.request.write.len);
               pairing_data.length = event->evt.gatts_evt.params.authorize_request.request.write.offset + event->evt.gatts_evt.params.authorize_request.request.write.len;
               pairing_send_auth_write_reply();
             }
@@ -190,7 +185,7 @@ void pairing_ble_event(ble_evt_t* event)
         }
         else if (event->evt.gatts_evt.params.authorize_request.request.write.handle == 0 && event->evt.gatts_evt.params.authorize_request.request.write.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW)
         {
-          if (pairing_process(pairing_data.pending_event, pairing_data.buffer, pairing_data.length, NULL) != PAIRING_STATUS_OK)
+          if (pairing_process(pairing_data.pending_event, buffer_buffer, pairing_data.length, NULL) != PAIRING_STATUS_OK)
           {
             pairing_error();
             break;
@@ -205,7 +200,7 @@ void pairing_ble_event(ble_evt_t* event)
         {
           if (event->evt.gatts_evt.params.authorize_request.request.read.offset == 0)
           {
-            if (pairing_process(pevent, pairing_data.buffer, sizeof(pairing_data.buffer), &pairing_data.length) != PAIRING_STATUS_OK)
+            if (pairing_process(pevent, buffer_buffer, sizeof(buffer_buffer), &pairing_data.length) != PAIRING_STATUS_OK)
             {
               pairing_error();
               break;
@@ -220,7 +215,7 @@ void pairing_ble_event(ble_evt_t* event)
               .update = 1,
               .offset = 0,
               .len = pairing_data.length,
-              .p_data = pairing_data.buffer
+              .p_data = buffer_buffer
             }
           };
           err_code = sd_ble_gatts_rw_authorize_reply(pairing_handle.connection, &reply);
