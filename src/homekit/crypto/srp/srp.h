@@ -31,6 +31,7 @@ extern srp_keys_t srp;
 typedef void (*moretime_t)(void);
 
 extern void srp_init(void);
+extern void srp_start(void);
 extern uint8_t srp_setA(uint8_t* a, uint16_t length, moretime_t moretime);
 extern uint8_t srp_checkM1(uint8_t* m1, uint16_t length);
 extern uint8_t* srp_getSalt(void);

@@ -346,6 +346,10 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
       case PAIRING_TAG_STATE:
         pairing_state = length == 1 ? value[0] : 0;
         STAT_TIMER_START(pairing_ms[pairing_state]);
+        if (pairing_state == 1)
+        {
+          srp_start();
+        }
         break;
 
       case PAIRING_TAG_SRP_A:
@@ -564,13 +568,16 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
       case PAIRING_TAG_STATE:
         pairing_state = length == 1 ? value[0] : 0;
         STAT_TIMER_START(verify_ms[pairing_state]);
+        if (pairing_state == 1)
+        {
+          session_init();
+        }
         break;
 
       case PAIRING_TAG_PUBLICKEY:
       {
         if (length == 32)
         {
-          session_init();
           memcpy(session_keys.client.public, value, sizeof(session_keys.client.public));
           crypto_scalarmult(session_keys.shared, session_keys.verify.secret, session_keys.client.public);
         }

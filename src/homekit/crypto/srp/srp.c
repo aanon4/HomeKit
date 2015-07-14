@@ -159,6 +159,12 @@ void srp_init(void)
   memory_buffer_alloc_free();
 }
 
+void srp_start(void)
+{
+  srp.clientM1 = 0;
+  srp.serverM1 = 0;
+}
+
 uint8_t srp_setA(uint8_t* abuf, uint16_t length, moretime_t moretime)
 {
   int err_code;
