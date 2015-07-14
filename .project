@@ -90,6 +90,11 @@
 			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf51_sdk/components/softdevice/common/softdevice_handler/softdevice_handler_appsh.c</location>
 		</link>
 		<link>
+			<name>src/nrf51/nrf51_sdk/system_nrf51422.c</name>
+			<type>1</type>
+			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf51_sdk/components/toolchain/system_nrf51422.c</location>
+		</link>
+		<link>
 			<name>src/nrf52/nrf52_sdk/app_gpiote_fast_detect.c</name>
 			<type>1</type>
 			<location>/Users/tim/Projects/Nordic/ARM/Nordic/nRF51/nrf52_sdk/components/libraries/gpiote/app_gpiote_fast_detect.c</location>
