@@ -25,6 +25,8 @@ void session_init(void)
   crypto_scalarmult_base(session_keys.verify.public, session_keys.verify.secret);
   session_keys.verify.secret[0] &= 248;
   session_keys.verify.secret[31] = (session_keys.verify.secret[31] & 127) | 64;
+  session_state.encrypting = 0;
+  session_state.havekeys = 0;
 }
 
 void session_setEncryption(uint8_t enable)

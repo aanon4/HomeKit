@@ -564,6 +564,7 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
       {
         if (length == 32)
         {
+          session_init();
           memcpy(session_keys.client.public, value, sizeof(session_keys.client.public));
           crypto_scalarmult(session_keys.shared, session_keys.verify.secret, session_keys.client.public);
         }

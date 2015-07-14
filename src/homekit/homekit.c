@@ -19,7 +19,6 @@ void homekit_init(void)
   uuids_init();
   accessoryinfo_init();
   pairing_init();
-  session_init();
 }
 
 void homekit_ble_event(ble_evt_t* p_ble_evt)
