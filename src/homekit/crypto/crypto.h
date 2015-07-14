@@ -34,7 +34,7 @@ typedef struct
     };
   } sign;
 
-  // Client we are paied with
+  // Client we are paired with
   struct
   {
     uint8_t name[36];

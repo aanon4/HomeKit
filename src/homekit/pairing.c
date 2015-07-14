@@ -349,11 +349,17 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
         break;
 
       case PAIRING_TAG_SRP_A:
-        srp_setA(value, length, pairing_send_auth_write_reply);
+        if (!srp_setA(value, length, pairing_send_auth_write_reply))
+        {
+          status = PAIRING_STATUS_ERROR;
+        }
         break;
 
       case PAIRING_TAG_SRP_M1:
-        srp_checkM1(value, length);
+        if (!srp_checkM1(value, length))
+        {
+          status = PAIRING_STATUS_ERROR;
+        }
         break;
 
       case PAIRING_TAG_MSG:

@@ -21,6 +21,9 @@ typedef struct
   uint8_t K[64];
   uint8_t M1[64];
   uint8_t M2[64];
+
+  uint8_t clientM1:1;
+  uint8_t serverM1:1;
 } srp_keys_t;
 
 extern srp_keys_t srp;
@@ -28,8 +31,8 @@ extern srp_keys_t srp;
 typedef void (*moretime_t)(void);
 
 extern void srp_init(void);
-extern void srp_setA(uint8_t* a, uint16_t length, moretime_t moretime);
-extern void srp_checkM1(uint8_t* m1, uint16_t length);
+extern uint8_t srp_setA(uint8_t* a, uint16_t length, moretime_t moretime);
+extern uint8_t srp_checkM1(uint8_t* m1, uint16_t length);
 extern uint8_t* srp_getSalt(void);
 extern uint8_t* srp_getB(void);
 extern uint8_t* srp_getM2(void);

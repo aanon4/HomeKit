@@ -159,7 +159,7 @@ void srp_init(void)
   memory_buffer_alloc_free();
 }
 
-void srp_setA(uint8_t* abuf, uint16_t length, moretime_t moretime)
+uint8_t srp_setA(uint8_t* abuf, uint16_t length, moretime_t moretime)
 {
   int err_code;
 
@@ -252,7 +252,20 @@ void srp_setA(uint8_t* abuf, uint16_t length, moretime_t moretime)
     memcpy(message + sizeof(srp_N_hash_srp_G_hash) + 64 + sizeof(srp.salt), abuf, length);
     memcpy(message + sizeof(srp_N_hash_srp_G_hash) + 64 + sizeof(srp.salt) + length, srp.B, sizeof(srp.B));
     memcpy(message + sizeof(srp_N_hash_srp_G_hash) + 64 + sizeof(srp.salt) + length + 384, srp.K, sizeof(srp.K));
-    crypto_hash_sha512(srp.M1, message, sizeof(message));
+    srp.serverM1 = 1;
+    if (srp.clientM1)
+    {
+      uint8_t hash[64];
+      crypto_hash_sha512(hash, message, sizeof(message));
+      if (memcmp(hash, srp.M1, sizeof(srp.M1)) != 0)
+      {
+        return 0;
+      }
+    }
+    else
+    {
+      crypto_hash_sha512(srp.M1, message, sizeof(message));
+    }
   }
 
   // getM2
@@ -263,6 +276,8 @@ void srp_setA(uint8_t* abuf, uint16_t length, moretime_t moretime)
     memcpy(message + length + sizeof(srp.M1), srp.K, sizeof(srp.K));
     crypto_hash_sha512(srp.M2, message, sizeof(message));
   }
+
+  return 1;
 }
 
 uint8_t* srp_getSalt(void)
@@ -275,8 +290,25 @@ uint8_t* srp_getB(void)
   return srp.B;
 }
 
-void srp_checkM1(uint8_t* m1, uint16_t length)
+uint8_t srp_checkM1(uint8_t* m1, uint16_t length)
 {
+  srp.clientM1 = 1;
+  if (length != sizeof(srp.M1))
+  {
+    return 0;
+  }
+  if (srp.serverM1)
+  {
+    if (memcmp(srp.M1, m1, sizeof(srp.M1)) != 0)
+    {
+      return 0;
+    }
+  }
+  else
+  {
+    memcpy(srp.M1, m1, sizeof(srp.M1));
+  }
+  return 1;
 }
 
 uint8_t* srp_getM2(void)
