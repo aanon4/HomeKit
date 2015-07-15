@@ -8,6 +8,33 @@
 #ifndef HOMEKIT_SERVICE_H_
 #define HOMEKIT_SERVICE_H_
 
+
+#define HOMEKIT_SERVICE_FAN                 0x0040
+#define HOMEKIT_SERVICE_GARAGE_DOOR         0x0041
+#define HOMEKIT_SERVICE_LIGHTBULB           0x0043
+#define HOMEKIT_SERVICE_LOCK_MNGMT          0x0044
+#define HOMEKIT_SERVICE_LOCK_MECH           0x0045
+#define HOMEKIT_SERVICE_OUTLET              0x0047
+#define HOMEKIT_SERVICE_SWITCH              0x0049
+#define HOMEKIT_SERVICE_THERMOSTAT          0x004A
+#define HOMEKIT_SERVICE_AIR_QUALITY         0x008D
+#define HOMEKIT_SERVICE_ALARM               0x007E
+#define HOMEKIT_SERVICE_CO_SENSOR           0x007F
+#define HOMEKIT_SERVICE_CONTACT_SENSOR      0x0080
+#define HOMEKIT_SERVICE_DOOR                0x0081
+#define HOMEKIT_SERVICE_HUMIDITY_SENSOR     0x0082
+#define HOMEKIT_SERVICE_LEAK_SENSOR         0x0083
+#define HOMEKIT_SERVICE_LIGHT_SENSOR        0x0084
+#define HOMEKIT_SERVICE_MOTION_SENSOR       0x0085
+#define HOMEKIT_SERVICE_OCCUPANCY_SENSOR    0x0086
+#define HOMEKIT_SERVICE_SMOKE_SENSOR        0x0087
+#define HOMEKIT_SERVICE_STATEFUL_SWITCH     0x0088
+#define HOMEKIT_SERVICE_STATELESS_SWITCH    0x0089
+#define HOMEKIT_SERVICE_TEMP_SENSOR         0x008A
+#define HOMEKIT_SERVICE_WINDOW              0x008B
+#define HOMEKIT_SERVICE_WINDOW_COVERING     0x008C
+
+
 struct service_characteristic_t;
 
 typedef void (*service_read_t)(uint8_t** p_data, uint16_t* p_length, const struct service_characteristic_t* characteristic);
