@@ -15,6 +15,7 @@
 #include "advertising.h"
 
 #include "homekit/homekit-config.h"
+#include "homekit/category.h"
 #include "homekit/uuids.h"
 #include "homekit/crypto/crypto.h"
 
@@ -29,6 +30,7 @@ void advertising_init(void)
     const uint8_t service_data_data[] =
     {
         HOMEKIT_CONFIG_DEVICE_NAME_BYTES,
+        HOMEKIT_CONFIG_CATEGORY,
         HOMEKIT_CONFIG_VERSION,
         crypto_advertise()
     };
