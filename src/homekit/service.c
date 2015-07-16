@@ -71,7 +71,7 @@ void service_addService(const service_service_t* service, const service_characte
       {
         .read = !!characteristics[i].read,
         .write = !!characteristics[i].write,
-        .notify = characteristics[i].notify
+        .indicate = characteristics[i].notify
       },
       .p_char_user_desc = (uint8_t*)characteristics[i].name,
       .char_user_desc_max_size = strlen(characteristics[i].name),
@@ -275,7 +275,7 @@ void service_notify(const service_characteristic_t* characteristic)
     const ble_gatts_hvx_params_t params =
     {
       .handle = service_findHandleFromCharacteristic(characteristic),
-      .type = BLE_GATT_HVX_NOTIFICATION,
+      .type = BLE_GATT_HVX_INDICATION,
     };
     err_code = sd_ble_gatts_hvx(service_state.connection_handle, &params);
     APP_ERROR_CHECK(err_code);
