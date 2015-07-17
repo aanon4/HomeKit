@@ -44,6 +44,10 @@ Time: 3.7 seconds
 
 Time (with assembly multiply): 0.26 seconds
 
+## Memory
+
+The HomeKit code is approximately 28K (compiled with -Os) and uses 1K of RAM. During Pairing an additional 11K of stack RAM is used.
+
 # Thanks
 
 I want to thank a number of projects which made this possible:
