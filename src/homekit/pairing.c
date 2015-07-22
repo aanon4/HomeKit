@@ -140,6 +140,7 @@ void pairing_ble_event(ble_evt_t* event)
   {
   case BLE_GAP_EVT_CONNECTED:
     pairing_handle.connection = event->evt.gap_evt.conn_handle;
+    pairing_state = 0;
     break;
 
   case BLE_GAP_EVT_DISCONNECTED:
@@ -448,6 +449,9 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
   {
     switch (pairing_state)
     {
+    case 0:
+      break;
+
     case 1:
     {
       pairing_state = 2;
@@ -512,6 +516,9 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
   {
     switch (pairing_state)
     {
+    case 0:
+      break;
+
     case 1:
     {
       pairing_state = 2;
@@ -727,6 +734,9 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
   {
     switch (pairing_state)
     {
+    case 0:
+      break;
+
     case 1:
       pairing_state = 2;
       if (session_isEncrypted())
