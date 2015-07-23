@@ -71,7 +71,7 @@ void service_addService(const service_service_t* service, const service_characte
       {
         .read = !!characteristics[i].read,
         .write = !!characteristics[i].write,
-        .indicate = characteristics[i].notify
+        //.indicate = characteristics[i].notify
       },
       .p_char_user_desc = (uint8_t*)characteristics[i].name,
       .char_user_desc_max_size = strlen(characteristics[i].name),
