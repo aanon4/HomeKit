@@ -20,7 +20,7 @@ void devinfo_init(void)
     ble_dis_init_t discfg =
     {
     	.manufact_name_str.p_str = MANUFACTURER_NAME,
-    	.manufact_name_str.length = sizeof(MANUFACTURER_NAME),
+    	.manufact_name_str.length = sizeof(MANUFACTURER_NAME) - 1,
     	.dis_attr_md.read_perm = { 1, 1 },
     	.dis_attr_md.write_perm = { 0, 0 }
     };
