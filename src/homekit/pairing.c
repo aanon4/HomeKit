@@ -207,20 +207,23 @@ void pairing_ble_event(ble_evt_t* event)
               break;
             }
           }
-          ble_gatts_rw_authorize_reply_params_t reply =
+          if (pairing_handle.connection != BLE_CONN_HANDLE_INVALID)
           {
-            .type = BLE_GATTS_AUTHORIZE_TYPE_READ,
-            .params.read =
+            ble_gatts_rw_authorize_reply_params_t reply =
             {
-              .gatt_status = BLE_GATT_STATUS_SUCCESS,
-              .update = 1,
-              .offset = 0,
-              .len = pairing_data.length,
-              .p_data = buffer_buffer
-            }
-          };
-          err_code = sd_ble_gatts_rw_authorize_reply(pairing_handle.connection, &reply);
-          APP_ERROR_CHECK(err_code);
+              .type = BLE_GATTS_AUTHORIZE_TYPE_READ,
+              .params.read =
+              {
+                .gatt_status = BLE_GATT_STATUS_SUCCESS,
+                .update = 1,
+                .offset = 0,
+                .len = pairing_data.length,
+                .p_data = buffer_buffer
+              }
+            };
+            err_code = sd_ble_gatts_rw_authorize_reply(pairing_handle.connection, &reply);
+            APP_ERROR_CHECK(err_code);
+          }
         }
         break;
 
@@ -260,7 +263,7 @@ static void pairing_send_auth_write_reply(void)
 {
   uint32_t err_code;
 
-  if (!pairing_data.sent_reply)
+  if (!pairing_data.sent_reply && pairing_handle.connection != BLE_CONN_HANDLE_INVALID)
   {
     pairing_data.sent_reply = 1;
     static const ble_gatts_rw_authorize_reply_params_t reply =
@@ -279,6 +282,7 @@ static void pairing_error(void)
 
   err_code = sd_ble_gap_disconnect(pairing_handle.connection, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
   APP_ERROR_CHECK(err_code);
+  pairing_handle.connection = BLE_CONN_HANDLE_INVALID;
 }
 
 static Pairing_Event pairing_map_write_event(uint16_t hand)
