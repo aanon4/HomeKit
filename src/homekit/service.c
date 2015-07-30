@@ -25,7 +25,7 @@ static struct
   uint16_t                          length;
   struct
   {
-    uint16_t                        handle;
+    uint16_t                        value_handle;
     const service_characteristic_t* characteristic;
   } map[HOMEKIT_CONFIG_SERVICE_MAX_CHARACTERISTICS];
   uint8_t           mapfree;
@@ -49,6 +49,12 @@ void service_addService(const service_service_t* service, const service_characte
       APP_ERROR_CHECK(NRF_ERROR_INTERNAL);
     }
 
+    ble_gatts_attr_md_t cccd =
+    {
+      .read_perm = { 1, 1 },
+      .write_perm = { 1, 1 },
+      .vloc = BLE_GATTS_VLOC_STACK
+    };
     ble_gatts_attr_md_t metadata =
     {
       .read_perm = { !!characteristics[i].read, !!characteristics[i].read },
@@ -71,17 +77,18 @@ void service_addService(const service_service_t* service, const service_characte
       {
         .read = !!characteristics[i].read,
         .write = !!characteristics[i].write,
-        //.indicate = characteristics[i].notify
+        .indicate = characteristics[i].notify
       },
       .p_char_user_desc = (uint8_t*)characteristics[i].name,
       .char_user_desc_max_size = strlen(characteristics[i].name),
-      .char_user_desc_size = strlen(characteristics[i].name)
+      .char_user_desc_size = strlen(characteristics[i].name),
+      .p_cccd_md = (characteristics[i].notify ? &cccd : NULL)
     };
 
     ble_gatts_char_handles_t newhandle;
     err_code = sd_ble_gatts_characteristic_add(service_handle, &character, &attr, &newhandle);
     APP_ERROR_CHECK(err_code);
-    service_state.map[service_state.mapfree].handle = newhandle.value_handle;
+    service_state.map[service_state.mapfree].value_handle = newhandle.value_handle;
     service_state.map[service_state.mapfree].characteristic = &characteristics[i];
     service_state.mapfree++;
   }
@@ -226,7 +233,6 @@ void service_ble_event(ble_evt_t* event)
           err_code = sd_ble_gatts_rw_authorize_reply(event->evt.gatts_evt.conn_handle, &reply);
           APP_ERROR_CHECK(err_code);
         }
-        break;
       }
       break;
     }
@@ -234,6 +240,13 @@ void service_ble_event(ble_evt_t* event)
     default:
       break;
     }
+    break;
+  }
+
+  case BLE_GATTS_EVT_SYS_ATTR_MISSING:
+  {
+    err_code = sd_ble_gatts_sys_attr_set(event->evt.gatts_evt.conn_handle, NULL, 0, 0);
+    APP_ERROR_CHECK(err_code);
     break;
   }
 
@@ -246,7 +259,7 @@ static const service_characteristic_t* service_findCharacteristicByHandle(uint16
 {
   for (unsigned i = service_state.mapfree; i--; )
   {
-    if (service_state.map[i].handle == handle)
+    if (service_state.map[i].value_handle == handle)
     {
       return service_state.map[i].characteristic;
     }
@@ -260,7 +273,7 @@ static uint16_t service_findHandleFromCharacteristic(const service_characteristi
   {
     if (service_state.map[i].characteristic == characteristic)
     {
-      return service_state.map[i].handle;
+      return service_state.map[i].value_handle;
     }
   }
   return BLE_CONN_HANDLE_INVALID;
@@ -270,7 +283,7 @@ void service_notify(const service_characteristic_t* characteristic)
 {
   uint32_t err_code;
 
-  if (characteristic->notify)
+  if (characteristic->notify && service_state.connection_handle != BLE_CONN_HANDLE_INVALID)
   {
     const ble_gatts_hvx_params_t params =
     {
@@ -278,7 +291,11 @@ void service_notify(const service_characteristic_t* characteristic)
       .type = BLE_GATT_HVX_INDICATION,
     };
     err_code = sd_ble_gatts_hvx(service_state.connection_handle, &params);
-    APP_ERROR_CHECK(err_code);
+    // NRF_ERROR_INVALID_STATE happens if we attempt to notify and no one is listening
+    if (err_code != NRF_SUCCESS && err_code != NRF_ERROR_INVALID_STATE)
+    {
+      APP_ERROR_CHECK(err_code);
+    }
   }
 }
 
