@@ -36,7 +36,7 @@ void accessoryinfo_init(void)
     { .name = "4;", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_MANUFACTURER }, SERVICE_STRING(HOMEKIT_CONFIG_MANUFACTURER) },
     { .name = "5;", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_MODEL }, SERVICE_STRING(HOMEKIT_CONFIG_MODEL) },
     { .name = "6;", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SERIAL_NR }, SERVICE_STRING(HOMEKIT_CONFIG_SERIAL_NR) },
-    { .name = "7;", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_IDENTITY }, .length = 1, .write = accessoryinfo_identify },
+    { .name = "7;", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_IDENTITY }, .length = 1, .write = accessoryinfo_identify, .plain = 1 },
 #if defined(HOMEKIT_CONFIG_FIRMWARE_REV)
     { .name = "8;", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_FIRMWARE_REV }, SERVICE_STRING(HOMEKIT_CONFIG_FIRMWARE_REV) },
 #endif
