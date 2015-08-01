@@ -72,11 +72,11 @@ void pairing_init(void)
     uint16_t*       handle;
   } init[] =
   {
-    { HOMEKIT_SERVICE_ID,   "Service Instance ID",  (uint8_t*)id, sizeof(id) - 1,           .read = 1 },
-    { HOMEKIT_PAIR_SETUP,   "Pair Setup",           buffer_buffer, PAIRING_SETUP_MAX_SIZE,  .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairsetup },
-    { HOMEKIT_PAIR_VERIFY,  "Pair Verify",          buffer_buffer, PAIRING_VERIFY_MAX_SIZE, .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairverify },
-    { HOMEKIT_PAIR_FEATURES,"Pairing Features",     (uint8_t*)&features, sizeof(features),  .read = 1 },
-    { HOMEKIT_PAIRINGS,     "Pairings",             buffer_buffer, PAIRING_PAIRS_MAX_SIZE,  .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairings },
+    { HOMEKIT_SERVICE_ID,   "95;", (uint8_t*)id, sizeof(id) - 1,           .read = 1 },
+    { HOMEKIT_PAIR_FEATURES,"96;", (uint8_t*)&features, sizeof(features),  .read = 1 },
+    { HOMEKIT_PAIR_SETUP,   "97;", buffer_buffer, PAIRING_SETUP_MAX_SIZE,  .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairsetup },
+    { HOMEKIT_PAIR_VERIFY,  "98;", buffer_buffer, PAIRING_VERIFY_MAX_SIZE, .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairverify },
+    { HOMEKIT_PAIRINGS,     "99;", buffer_buffer, PAIRING_PAIRS_MAX_SIZE,  .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairings },
     {}
   };
 
