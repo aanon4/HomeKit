@@ -58,25 +58,20 @@ void pairing_init(void)
   crypto_init();
 
   static const uint8_t features = HOMEKIT_CONFIG_MFI_CERTIFIED;
-  static const uint8_t id[] = HOMEKIT_CONFIG_PAIRING_ID;
   static const struct
   {
     const uint16_t  id;
     const char*     name;
     uint8_t*        data;
     const uint16_t  dlen;
-    const uint8_t   read:1;
-    const uint8_t   write:1;
-    const uint8_t   read_auth:1;
-    const uint8_t   write_auth:1;
     uint16_t*       handle;
   } init[] =
   {
-    { HOMEKIT_SERVICE_ID,   "95;", (uint8_t*)id, sizeof(id) - 1,           .read = 1 },
-    { HOMEKIT_PAIR_FEATURES,"96;", (uint8_t*)&features, sizeof(features),  .read = 1 },
-    { HOMEKIT_PAIR_SETUP,   "97;", buffer_buffer, PAIRING_SETUP_MAX_SIZE,  .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairsetup },
-    { HOMEKIT_PAIR_VERIFY,  "98;", buffer_buffer, PAIRING_VERIFY_MAX_SIZE, .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairverify },
-    { HOMEKIT_PAIRINGS,     "99;", buffer_buffer, PAIRING_PAIRS_MAX_SIZE,  .read = 1, .write = 1, .read_auth = 1, .write_auth = 1, .handle = &pairing_handle.pairings },
+    { HOMEKIT_SERVICE_ID,   "101;", (uint8_t*)"100", sizeof("100") - 1 },
+    { HOMEKIT_PAIR_FEATURES,"102;", (uint8_t*)&features, sizeof(features), },
+    { HOMEKIT_PAIR_SETUP,   "103;", buffer_buffer, PAIRING_SETUP_MAX_SIZE,  .handle = &pairing_handle.pairsetup  },
+    { HOMEKIT_PAIR_VERIFY,  "104;", buffer_buffer, PAIRING_VERIFY_MAX_SIZE, .handle = &pairing_handle.pairverify },
+    { HOMEKIT_PAIRINGS,     "105;", buffer_buffer, PAIRING_PAIRS_MAX_SIZE,  .handle = &pairing_handle.pairings   },
     {}
   };
 
@@ -91,13 +86,14 @@ void pairing_init(void)
 
   for (uint8_t idx = 0; init[idx].id; idx++)
   {
+    const uint8_t auth = init[idx].handle ? 1 : 0;
     const ble_gatts_attr_md_t metadata =
     {
-      .read_perm = { init[idx].read, init[idx].read },
-      .write_perm = { init[idx].write, init[idx].write },
-      .rd_auth = init[idx].read_auth,
-      .wr_auth = init[idx].write_auth,
-      .vlen = init[idx].read_auth ? 1 : 0,
+      .read_perm = { 1, 1 },
+      .write_perm = { auth, auth },
+      .rd_auth = auth,
+      .wr_auth = auth,
+      .vlen = auth,
       .vloc = init[idx].data ? BLE_GATTS_VLOC_USER : BLE_GATTS_VLOC_STACK
     };
     const ble_uuid_t uuid =
@@ -115,8 +111,8 @@ void pairing_init(void)
     };
     const ble_gatts_char_md_t characteristic =
     {
-      .char_props.read = init[idx].read,
-      .char_props.write = init[idx].write,
+      .char_props.read = 1,
+      .char_props.write = auth,
       .p_char_user_desc = (uint8_t*)init[idx].name,
       .char_user_desc_max_size = strlen(init[idx].name),
       .char_user_desc_size = strlen(init[idx].name)

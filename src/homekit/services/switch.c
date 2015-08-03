@@ -18,7 +18,6 @@
 #include "homekit/service.h"
 #include "switch.h"
 
-#define ID    "11"
 #define NAME  "Demo Switch"
 #if defined(NRF52)
 #define LED   17 // P0.17
@@ -54,9 +53,8 @@ void service_switch_init(void)
   };
   static const service_characteristic_t characteristics[] =
   {
-    { .name = "Service Instance ID", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SERVICE_ID }, SERVICE_STRING(ID), .plain = 1 },
-    { .name = "Name", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_NAME }, SERVICE_STRING(NAME) },
-    { .name = "On", .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SWITCH_ON }, .length = 1, .read = service_switch_state, .write = service_switch_onoff, .notify = 1 },
+    { .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_NAME }, SERVICE_STRING(NAME) },
+    { .uuid = { .type = HOMEKIT_BASE_TYPE, .uuid = HOMEKIT_SWITCH_ON }, .length = 1, .read = service_switch_state, .write = service_switch_onoff, .notify = 1 },
     {}
   };
   service_addService(&service, characteristics);

@@ -49,7 +49,6 @@ typedef struct
 
 typedef struct service_characteristic_t
 {
-  char*           name;
   ble_uuid_t      uuid;
   service_read_t  read;
   service_write_t write;
