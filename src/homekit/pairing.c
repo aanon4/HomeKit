@@ -475,9 +475,9 @@ static Pairing_Status pairing_process(Pairing_Event event, uint8_t* data, uint16
       tlv_encode_next(&data, rlength, PAIRING_TAG_SRP_M2, 64, srp_getM2());
 
       // MFi
-      // Guessing that a MFi certified device returns something extra here since this is the last transaction
-      // iOS will read before terminating the pairing process if you enable MFi compatibility.
-
+      // Looks like this payload gets wrapped in MFi information when MFi is enabled. The packet is prefixed
+      // with 0x0C 0xFF and postfixed with extra data, possibly some sort of signing info to prove the device
+      // is MFi enabled.
       break;
     }
 
