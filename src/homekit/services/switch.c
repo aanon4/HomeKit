@@ -18,7 +18,7 @@
 #include "homekit/service.h"
 #include "switch.h"
 
-#define ID    "1"
+#define ID    "11"
 #define NAME  "Demo Switch"
 #if defined(NRF52)
 #define LED   17 // P0.17
