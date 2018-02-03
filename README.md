@@ -7,6 +7,10 @@ you to play with.
 This stack runs on the Nordic BLE nRF51 series of chips. The projects compiles using the "standard" Eclipse/GCC toolchain
 setup.
 
+# NOTE
+
+**This code hasn't been updated in a long time, and it's been drawn to my attention that Apple's newer BLE spec for HomeKit is vastly different to this version.**
+
 # Code
 
 The code provides all the services required to pair iOS with a BLE device and to operate that device once paired. It
