@@ -1,5 +1,7 @@
 # HomeKit for Bluetooth (BLE)
 
+**This project has moved to https://gitlab.com/timwilkinson/HomeKit**
+
 Apple's HomeKit protocol supports both IP and BLE devices. While there appear to be a few open source implementations
 of IP stacks around (notably https://github.com/KhaosT/HAP-NodeJS), I couldn't find any BLE stacks. So, here's one for
 you to play with.
